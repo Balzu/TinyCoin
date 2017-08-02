@@ -23,10 +23,28 @@ public class Block {
 			transactions.add(t);
 			fees += t.getFee();
 		}
-		reward = fixedFee + fees;
-			
+		reward = fixedFee + fees;		
 		
-		
+	}
+
+	public String getBid() {
+		return bid;
+	}
+
+	public String getParent() {
+		return parent;
+	}
+
+	public TinyCoinNode getMiner() {
+		return miner;
+	}
+
+	public double getReward() {
+		return reward;
+	}
+
+	public List<Transaction> getTransactions() {
+		return transactions;
 	}
 	
 

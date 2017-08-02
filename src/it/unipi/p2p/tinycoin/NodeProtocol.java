@@ -1,6 +1,7 @@
 package it.unipi.p2p.tinycoin;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import peersim.cdsim.CDProtocol;
@@ -18,12 +19,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 	
 	private double transProb;
 	private int numTrans;
-	private Map<String, Transaction> transPool;
 	
-
-	public void setTransPool(Map<String, Transaction> transPool) {
-		this.transPool = transPool;
-	}
 
 	public void setNumTrans(int numTrans) {
 		this.numTrans = numTrans;
@@ -32,8 +28,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 	public NodeProtocol(String prefix) 
 	{
 		transProb = Configuration.getDouble(prefix + "." + PAR_P_TRANS);
-		numTrans = 0;
-		transPool = new HashMap<>();
+		numTrans = 0;		
 	}
 	
 	@Override
@@ -42,8 +37,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 		try {
 			np = (NodeProtocol)super.clone();
 			np.setTransProb(transProb);
-			np.setNumTrans(0);
-			np.setTransPool(new HashMap<>());	//TODO ok inizializzarne una nuova? 		
+			np.setNumTrans(0);					
 		}
 		catch(CloneNotSupportedException  e) {
 			
@@ -80,7 +74,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 			Transaction t = new Transaction(tid, tnode, recipient, amount, fee);
 			System.out.println(t.toString());
 			// Transaction has been created, so update balance and insert into local pool of unconfirmed transactions
-			transPool.put(tid, t);
+			tnode.getTransPool().put(tid, t);
 			balance -= totalSpent;
 			
 			// Send the transaction to all neighbor nodes
@@ -92,20 +86,60 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 	@Override
 	public void processEvent(Node node, int pid, Object event)
 	{
-		Transaction t = (Transaction) event;
-		
-		// If never received the transaction, broadcast it to the neighbors
-		String tid = t.getTid();
-		if (!transPool.containsKey(tid)) {
-			//System.out.println("Node " + node.getID() + " received transaction " + tid);
-			transPool.put(tid, t);
-			sendTransactionToNeighbors(node, pid, t);
+		if (event instanceof Transaction) {
+			
+			Transaction t = (Transaction) event;
+			Map<String, Transaction> transPool = ((TinyCoinNode) node).getTransPool();
+			// If never received the transaction, broadcast it to the neighbors
+			String tid = t.getTid();
+			if (!transPool.containsKey(tid)) {
+				//System.out.println("Node " + node.getID() + " received transaction " + tid);
+				transPool.put(tid, t);
+				sendTransactionToNeighbors(node, pid, t);
+			}
 		}
+			
+		
+		else if (event instanceof Block) {
+			TinyCoinNode tnode = (TinyCoinNode)node;	
+			
+			//if (!tnode.isMiner())
+			//	return;
+			
+			// If the parent field of the block is valid, then the honest miner adds the block 
+			// to its blockchain and removes the transactions inside the block from the pool.
+			// In other words, in case of fork only the first block is kept, while the latter is discarded
+			Block b = (Block)event;		
+			List<Block> blockchain = tnode.getBlockchain();
+			String last = blockchain.size()==0 ? null : blockchain.get(blockchain.size()-1).getBid();
+			if ( last == b.getParent()) {
+				blockchain.add(b);
+				Map<String, Transaction> transPool = tnode.getTransPool();
+				for (Transaction t : b.getTransactions()) {
+					// If this node is the recipient, update its balance
+					if (t.getOutput() == node) {  //TODO check if test works
+						tnode.increaseBalance(t.getAmount());
+					}
+					transPool.remove(t.getTid());
+				}
+				
+			// Finally (if block is valid) send the block to all  the neighbor nodes				
+				sendBlockToNeighbors(node, pid, b);	
+				
+		    }
+		}
+		
 	}
 		
 	
 	
-	public void sendTransactionToNeighbors(Node sender, int pid, Transaction t) {
+	/** Sends a transaction t to the protocol pid of all the neighbor nodes
+	 * 
+	 * @param sender The sender node
+	 * @param pid The id of the protocol the message is directed to
+	 * @param t The transaction to be sent
+	 */
+	 public void sendTransactionToNeighbors(Node sender, int pid, Transaction t) {
 		// Send the transaction to all neighbor nodes
 		int linkableID = FastConfig.getLinkable(pid);
 		Linkable linkable = (Linkable) sender.getProtocol(linkableID);
@@ -113,10 +147,24 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 				Node peer = linkable.getNeighbor(i);
 				((Transport)sender.getProtocol(FastConfig.getTransport(pid))) //TODO: set Transport class
 				.send(sender, peer, t, pid);
+			}		
 	}
-		
-		
-		
+	
+	
+	/** Sends a block b to the protocol pid of all the neighbor nodes
+	 * 
+	 * @param sender The sender node
+	 * @param pid The id of the protocol the message is directed to
+	 * @param b The block to be sent
+	 */
+	public void sendBlockToNeighbors(Node sender, int pid, Block b) {		
+		int linkableID = FastConfig.getLinkable(pid);
+		Linkable linkable = (Linkable) sender.getProtocol(linkableID);
+			for (int i =0; i<linkable.degree(); i++) {
+				Node peer = linkable.getNeighbor(i);
+				((Transport)sender.getProtocol(FastConfig.getTransport(pid)))
+				.send(sender, peer, b, pid);
+			}
 	}
 	
 	public double getTransProb() {

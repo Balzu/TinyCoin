@@ -6,7 +6,7 @@ public class Transaction {
 	private final TinyCoinNode input;
 	private final TinyCoinNode output;
 	private final double amount;
-	private double fee;
+	private final double fee;
 	
 	public Transaction(String id, TinyCoinNode input, TinyCoinNode output, double amount,
 			double fee) {
@@ -17,6 +17,14 @@ public class Transaction {
 		this.fee = fee; //TODO: set as parameter the fee per transaction
 	}
 	
+	public double getAmount() {
+		return amount;
+	}
+
+	public TinyCoinNode getOutput() {
+		return output;
+	}
+
 	public double getFee() {
 		return fee;
 	}

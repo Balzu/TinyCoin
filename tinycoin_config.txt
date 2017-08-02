@@ -33,7 +33,11 @@ protocol.tr.transport urt
 protocol.tr.drop DROP
 
 protocol.miner it.unipi.p2p.tinycoin.MinerProtocol
+protocol.miner.linkable link
+protocol.miner.node_protocol node
 protocol.miner.step CYCLE_LENGTH
+protocol.miner.max_trans_block 30
+protocol.miner.reward 10
 
 init.0 WireKOut
 init.0.protocol link
@@ -50,6 +54,10 @@ init.1.max_balance 1000
 init.2 CDScheduler
 init.2.protocol node
 init.2.randstart
+
+init.3 CDScheduler
+init.3.protocol miner
+init.3.randstart
 
 control.oracle it.unipi.p2p.tinycoin.Oracle
 control.oracle.prob_2_miners 0.05
