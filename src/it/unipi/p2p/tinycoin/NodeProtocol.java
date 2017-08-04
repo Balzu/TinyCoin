@@ -103,30 +103,35 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 		else if (event instanceof Block) {
 			TinyCoinNode tnode = (TinyCoinNode)node;	
 			
-			//if (!tnode.isMiner())
-			//	return;
+			if (tnode.isSelfishMiner()) {
+				
+			}
 			
-			// If the parent field of the block is valid, then the honest miner adds the block 
-			// to its blockchain and removes the transactions inside the block from the pool.
-			// In other words, in case of fork only the first block is kept, while the latter is discarded
-			Block b = (Block)event;		
-			List<Block> blockchain = tnode.getBlockchain();
-			String last = blockchain.size()==0 ? null : blockchain.get(blockchain.size()-1).getBid();
-			if ( last == b.getParent()) {
-				blockchain.add(b);
-				Map<String, Transaction> transPool = tnode.getTransPool();
-				for (Transaction t : b.getTransactions()) {
-					// If this node is the recipient, update its balance
-					if (t.getOutput() == node) {  //TODO check if test works
-						tnode.increaseBalance(t.getAmount());
+			else {
+				// If the parent field of the block is valid, then the honest miner adds the block 
+				// to its blockchain and removes the transactions inside the block from the pool.
+				// In other words, in case of fork only the first block is kept, while the latter is discarded
+				Block b = (Block)event;		
+				List<Block> blockchain = tnode.getBlockchain();
+				String last = blockchain.size()==0 ? null : blockchain.get(blockchain.size()-1).getBid();
+				if ( last == b.getParent()) {
+					blockchain.add(b);
+					Map<String, Transaction> transPool = tnode.getTransPool();
+					for (Transaction t : b.getTransactions()) {
+						// If this node is the recipient, update its balance
+						if (t.getOutput() == node) {  //TODO check if test works
+							tnode.increaseBalance(t.getAmount());
+						}
+						transPool.remove(t.getTid());
 					}
-					transPool.remove(t.getTid());
-				}
+					
+				// Finally (if block is valid) send the block to all  the neighbor nodes				
+					sendBlockToNeighbors(node, pid, b);						
+			    }
 				
-			// Finally (if block is valid) send the block to all  the neighbor nodes				
-				sendBlockToNeighbors(node, pid, b);	
-				
-		    }
+			}
+			
+			
 		}
 		
 	}

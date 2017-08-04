@@ -11,7 +11,7 @@ import peersim.core.Linkable;
 import peersim.core.Node;
 import peersim.transport.Transport;
 
-//TODO: must implement (also) EDProtocol
+//TODO: must add a method to reach consensus
 public class MinerProtocol implements CDProtocol{
 	
 	private static final String PAR_MAX_TRANS_BLOCK = "max_trans_block";
@@ -20,9 +20,9 @@ public class MinerProtocol implements CDProtocol{
 
 	private int minedBlocks;
 	private boolean selected;
-	private final int maxTransPerBlock;
-	private final double reward;
-	private final int nodeProtocol;
+	private int maxTransPerBlock;
+	private double reward;
+	private int nodeProtocol;
 	
 	public boolean isSelected() {
 		return selected;
@@ -44,7 +44,12 @@ public class MinerProtocol implements CDProtocol{
 		MinerProtocol mp = null;
 		try {
 			mp = (MinerProtocol)super.clone();
-			//mp.setMinedBlocks(this.getMinedBlocks());
+			mp.setMinedBlocks(0);
+			mp.setSelected(false);
+			mp.setMaxTransPerBlock(maxTransPerBlock);
+			mp.setReward(reward);
+			mp.setNodeProtocol(nodeProtocol);
+			
 		}
 		catch(CloneNotSupportedException  e) {
 			
@@ -52,6 +57,18 @@ public class MinerProtocol implements CDProtocol{
 		return mp;
 	}
 	
+	public void setMaxTransPerBlock(int maxTransPerBlock) {
+		this.maxTransPerBlock = maxTransPerBlock;
+	}
+
+	public void setReward(double reward) {
+		this.reward = reward;
+	}
+
+	public void setNodeProtocol(int nodeProtocol) {
+		this.nodeProtocol = nodeProtocol;
+	}
+
 	public int getMinedBlocks() {
 		return minedBlocks;
 	}

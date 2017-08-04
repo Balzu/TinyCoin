@@ -59,7 +59,7 @@ public class NodesInitializer implements Control
 			// se è anche un miner, allora eseguirà pure il protocollo del miner
 			double drandom = r.nextDouble();
 			if (drandom < pminer) { // the node is a miner
-				n.setNode(false);
+				n.setNodetype(NodeType.MINER);
 				drandom = r.nextDouble();
 				if (drandom < pcpu)
 					n.setMtype(MinerType.CPU);
@@ -69,11 +69,10 @@ public class NodesInitializer implements Control
 					n.setMtype(MinerType.FPGA);
 				else
 					n.setMtype(MinerType.ASIC);	
-				//TODO: disable node protocol
 			}
 			else 
 			{
-				n.setNode(true);
+				n.setNodetype(NodeType.NODE);
 				n.setMtype(null);
 				//TODO: disable miner protocol
 			}

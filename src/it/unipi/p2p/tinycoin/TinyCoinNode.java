@@ -8,8 +8,9 @@ import peersim.core.GeneralNode;
 
 public class TinyCoinNode extends GeneralNode{
 	
-	private MinerType mtype;
-	private boolean node;	
+	
+	private NodeType nodeType;
+	private MinerType minerType;
 	private double balance;
 	private List<Block> blockchain; 
     private Map<String, Transaction> transPool;
@@ -21,23 +22,23 @@ public class TinyCoinNode extends GeneralNode{
 	
 
 	public MinerType getMtype() {
-		return mtype;
+		return minerType;
 	}
 
 	public void setMtype(MinerType mtype) {
-		this.mtype = mtype;
+		this.minerType = mtype;
 	}
 
 	public boolean isNode() {
-		return node;
+		return nodeType==NodeType.NODE;
 	}
 	
 	public boolean isMiner() {
-		return !isNode();
+		return nodeType==NodeType.MINER;
 	}
-
-	public void setNode(boolean node) {
-		this.node = node;
+	
+	public boolean isSelfishMiner() {
+		return nodeType==NodeType.SELFISH_MINER;
 	}
 	
 
@@ -75,11 +76,16 @@ public class TinyCoinNode extends GeneralNode{
 	{
 		TinyCoinNode clone = (TinyCoinNode)super.clone();
 		//TODO: devo lasciarli i 2 metodi sotto o non servono?
+		clone.setNodetype(nodeType);
 		clone.setMtype(this.getMtype());
-		clone.setNode(this.isNode());
 		clone.setTransPool(new HashMap<>());	//TODO ok inizializzarne una nuova? 
 		clone.setBlockchain(new ArrayList<>());
 		return clone;
+	}
+
+
+	public void setNodetype(NodeType ntype) {
+		this.nodeType = ntype;
 	}
 
 
