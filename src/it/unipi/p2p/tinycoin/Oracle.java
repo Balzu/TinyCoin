@@ -14,6 +14,7 @@ public class Oracle implements Control {
 	private static final String PAR_HRFPGA = "hr_fpga";
 	private static final String PAR_HRASIC = "hr_asic";
 	private static final String PAR_MINER_PROT = "miner_protocol";
+	private static final String PAR_SMINER_PROT = "self_miner_protocol";
 	
 	private final String prefix;
 	private final double p2;
@@ -23,11 +24,13 @@ public class Oracle implements Control {
 	private double pasic;
 	private Random r;
 	private final int minerPid;
+	private final int selfMinerPid;
 		
 	public Oracle(String prefix) 
 	{
 		p2 = Configuration.getDouble(prefix + "." + PAR_P2);
 		minerPid = Configuration.getPid(prefix + "." + PAR_MINER_PROT);
+		selfMinerPid = Configuration.getPid(prefix + "." + PAR_SMINER_PROT);
 		pcpu = pgpu = pfpga = pasic = -1.0;	
 		this.prefix = prefix;
 		r = new Random(0);
@@ -46,28 +49,22 @@ public class Oracle implements Control {
 				return true; // execute returns true if simulation has to be stopped
 		}
 		
-		double rd = r.nextDouble();
 		MinerType m1, m2;
 		m1 = getMinerType();       // Always choose one miner
 		TinyCoinNode mn1 = (TinyCoinNode)chooseMinerNode(m1);
-		((MinerProtocol)mn1.getProtocol(minerPid)).setSelected(true);	// TODO?: invoca protocollo del miner per minare un nuovo blocco
+		if (mn1.isMiner())
+			((MinerProtocol)mn1.getProtocol(minerPid)).setSelected(true);	
+		else //selfish miner
+			((SelfishMinerProtocol)mn1.getProtocol(selfMinerPid)).setSelected(true);
+		double rd = r.nextDouble();
 		if (rd < p2) {              // two miners solved PoW 'concurrently'
 			m2 = getMinerType();
 			TinyCoinNode mn2 = (TinyCoinNode)chooseMinerNode(m2);
-			((MinerProtocol)mn2.getProtocol(minerPid)).setSelected(true); // TODO?: invoca protocollo del miner per minare un nuovo blocco
-		}
-		
-			
-		for (int i=0; i< Network.size(); i++) {
-			TinyCoinNode n = (TinyCoinNode) Network.get(i);
-			if (n.getMtype() == m1) {
-				
-			}
-		
-		
-		}	
-	
-		
+			if (mn2.isMiner())
+				((MinerProtocol)mn2.getProtocol(minerPid)).setSelected(true); 
+			else
+				((SelfishMinerProtocol)mn2.getProtocol(selfMinerPid)).setSelected(true); 
+		}		
 		return false;
 	}
 	

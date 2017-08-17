@@ -76,8 +76,8 @@ public class TinyCoinNode extends GeneralNode{
 	{
 		TinyCoinNode clone = (TinyCoinNode)super.clone();
 		//TODO: devo lasciarli i 2 metodi sotto o non servono?
-		clone.setNodetype(nodeType);
-		clone.setMtype(this.getMtype());
+		//clone.setNodetype(nodeType);
+		//clone.setMtype(this.getMtype());
 		clone.setTransPool(new HashMap<>());	//TODO ok inizializzarne una nuova? 
 		clone.setBlockchain(new ArrayList<>());
 		return clone;

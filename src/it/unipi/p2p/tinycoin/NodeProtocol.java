@@ -16,10 +16,18 @@ import peersim.transport.Transport;
 public class NodeProtocol implements CDProtocol, EDProtocol{
 	
 	private static final String PAR_P_TRANS = "transaction_prob";
+	private static final String PAR_SMINER = "self_miner_prot";
 	
 	private double transProb;
 	private int numTrans;
+	private int smpid;
+	private boolean fork;
+	private Block forked;
 	
+
+	public void setSmpid(int smpid) {
+		this.smpid = smpid;
+	}
 
 	public void setNumTrans(int numTrans) {
 		this.numTrans = numTrans;
@@ -29,15 +37,29 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 	{
 		transProb = Configuration.getDouble(prefix + "." + PAR_P_TRANS);
 		numTrans = 0;		
+		smpid = Configuration.getPid(prefix + "." + PAR_SMINER);
+		fork = false;
+		forked = null;
 	}
 	
+	public void setFork(boolean fork) {
+		this.fork = fork;
+	}
+
+	public void setForked(Block forked) {
+		this.forked = forked;
+	}
+
 	@Override
 	public Object clone() {
 		NodeProtocol np = null;
 		try {
 			np = (NodeProtocol)super.clone();
 			np.setTransProb(transProb);
-			np.setNumTrans(0);					
+			np.setNumTrans(0);
+			np.setSmpid(smpid);
+			np.setFork(false);
+			np.setForked(null);
 		}
 		catch(CloneNotSupportedException  e) {
 			
@@ -102,19 +124,75 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 		
 		else if (event instanceof Block) {
 			TinyCoinNode tnode = (TinyCoinNode)node;	
+			List<Block> blockchain = tnode.getBlockchain();
+			Block b = (Block)event;	
+			String last = blockchain.size()==0 ? null : blockchain.get(blockchain.size()-1).getBid();
 			
-			if (tnode.isSelfishMiner()) {
-				
+			if (tnode.isSelfishMiner()) {  //Selfish miner receives a new block from a honest node
+				SelfishMinerProtocol smp = (SelfishMinerProtocol)node.getProtocol(smpid);		
+				List<Block> privateBlockchain = smp.getPrivateBlockchain();
+				int privateBranchLength = smp.getPrivateBranchLength();
+				int prevDiff = privateBlockchain.size() - blockchain.size();
+				if ( last == b.getParent()) {
+					blockchain.add(b);
+					switch (prevDiff) {
+					case(0):
+						if (onlyAddTheBlock(privateBlockchain, blockchain))
+							privateBlockchain.add(b);             //simply add one block
+						else 
+							smp.copyPublicBlockchain(tnode);      // delete last block of private blockchain to make the two exactly equal
+						
+						smp.setPrivateBranchLength(0);
+						sendBlockToNeighbors(node, pid, b);
+						/*
+						if (privateBranchLength == 0) {
+							//blockchain.add(b);
+							privateBlockchain.add(b);
+							 // Send to every node because the other self miners should immediately start mining on the new block
+							sendBlockToNeighbors(node, pid, b);
+						}
+						else { //TODO: qualcosa non va qui : 
+							smp.copyPublicBlockchain(tnode);      
+							smp.setPrivateBranchLength(0);
+							sendBlockToNeighbors(node, pid, b);
+						}		
+						*/				
+						break;
+					case(1): 
+						Block sb = privateBlockchain.get(privateBlockchain.size() - 1);
+				     	sendBlockToNeighbors(node, pid, sb); 						
+						break;
+					case(2):
+						for (int i = privateBranchLength; i > 0; i--) {
+							sb = privateBlockchain.get(privateBlockchain.size() - i);
+							sendBlockToNeighbors(node, pid, sb); 
+						}
+						smp.copyPrivateBlockchain(tnode); //TODO: it is node's assumption, but is it ok?					
+						smp.setPrivateBranchLength(0);						
+						break;
+					default:
+						sb = privateBlockchain.get(privateBlockchain.size() - privateBranchLength);
+						sendBlockToNeighbors(node, pid, sb); 
+						//blockchain.add(sb);
+						smp.setPrivateBranchLength(privateBranchLength - 1);
+						break;
+					}
+				}
 			}
 			
 			else {
 				// If the parent field of the block is valid, then the honest miner adds the block 
-				// to its blockchain and removes the transactions inside the block from the pool.
-				// In other words, in case of fork only the first block is kept, while the latter is discarded
-				Block b = (Block)event;		
-				List<Block> blockchain = tnode.getBlockchain();
-				String last = blockchain.size()==0 ? null : blockchain.get(blockchain.size()-1).getBid();
-				if ( last == b.getParent()) {
+				// to its blockchain and removes the transactions inside the block from the pool.				
+				if ( last == b.getParent() ||
+						(fork == true && forked.getBid() == b.getParent())) {
+					if (fork == true) {													
+						if (forked.getBid() == b.getParent()) {
+							blockchain.remove(blockchain.size()-1);
+							blockchain.add(forked);
+						}
+						fork = false;  // Fork is resolved, regardless of which is the extended branch
+						forked = null;
+					}
 					blockchain.add(b);
 					Map<String, Transaction> transPool = tnode.getTransPool();
 					for (Transaction t : b.getTransactions()) {
@@ -128,6 +206,12 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 				// Finally (if block is valid) send the block to all  the neighbor nodes				
 					sendBlockToNeighbors(node, pid, b);						
 			    }
+				else if (blockchain.size() >= 2 && 
+						blockchain.get(blockchain.size()-2).getBid() == b.getParent() &&
+						blockchain.get(blockchain.size()-1).getBid() != b.getBid()) {
+					fork = true;
+					forked = b;
+				}
 				
 			}
 			
@@ -178,6 +262,15 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 
 	public void setTransProb(double transProb) {
 		this.transProb = transProb;
+	}
+	
+	private boolean onlyAddTheBlock(List<Block> privateBlockchain , List<Block> blockchain ) 
+	{
+		if (privateBlockchain.size() == 0 ||
+				blockchain.get(blockchain.size() -1).getParent() == privateBlockchain.get(privateBlockchain.size()-1).getBid())
+			return true;
+		else
+			return false;
 	}
 
 }

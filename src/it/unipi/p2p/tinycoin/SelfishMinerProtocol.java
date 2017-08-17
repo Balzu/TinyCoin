@@ -92,6 +92,7 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 		this.minedBlocks = minedBlocks;
 	}
 
+	
 	@Override
 	public void nextCycle(Node node, int pid)
 	{
@@ -105,20 +106,21 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 			Block b = createBlock(transPool, tnode);
 			String last = privateBlockchain.size()==0 ? null : privateBlockchain.get(privateBlockchain.size()-1).getBid();
 			
-			if (isValidBlock(last, b)) {
-				privateBlockchain.add(b);				
+			if (isValidBlock(last, b)) {								
 				// Announce the block either to the selfish miners or to all the neighbor nodes based on convenience
 				List<Block> blockchain = tnode.getBlockchain();
-				int prevDifference = privateBlockchain.size() - blockchain.size();			
+				int prevDifference = privateBlockchain.size() - blockchain.size();
+				privateBlockchain.add(b);
 				privateBranchLength ++;
 				// If there was a fork, publish both blocks of the private branch to win the tie break
 				if (prevDifference == 0 && privateBranchLength == 2 ) {
-					makeEqualBlockchains(tnode); // TODO my assuption, but is it correct?
+					copyPrivateBlockchain(tnode); // TODO my assumption, but is it correct?
 					for (int i = privateBranchLength; i > 0; i--) 
 						sendBlockToNeighbors(node, nodeProtocol, privateBlockchain.get(privateBlockchain.size()-i));
 					privateBranchLength = 0;				
 				}
-				sendBlockToSelfishMiners(node, pid, b);			
+				else  //TODO: added this 'else', to be checked
+					sendBlockToSelfishMiners(node, pid, b);			
 				System.out.println("Mined a block!" );
 			}			
 		}		
@@ -130,7 +132,7 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 				throw new Exception("Parent node of the new block is different from the last"
 						+ "node of the blockchain");
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();         //Exception put for debug purposes, it is fired everytime an already received block is received
 				return false;
 			}
 		}
@@ -185,7 +187,7 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 			privateBlockchain.add(b);
 			privateBranchLength++;
 			if (prevDifference == 0 && privateBranchLength == 2 ) {
-				makeEqualBlockchains(tnode);
+				copyPrivateBlockchain(tnode);
 				for (int i = privateBranchLength; i > 0; i--) 
 					sendBlockToNeighbors(node, nodeProtocol, privateBlockchain.get(privateBlockchain.size()-i));
 				privateBranchLength = 0;				
@@ -195,7 +197,7 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 	}
 	
 	
-	//TODO: merged tnode and node in tnode, should work but test
+	//TODO: 'merged' tnode and node in tnode, should work but test
 	public Block createBlock(Map<String, Transaction> transPool, TinyCoinNode tnode) {
 		minedBlocks++;
 		int transInBlock = Math.min(transPool.size(), maxTransPerBlock);
@@ -216,15 +218,36 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 		return new Block(bid, parent, tnode, trans, reward);	
 	}
 	
-	/** Update the public blockchain to be a copy of the private one
+	public List<Block> getPrivateBlockchain() {
+		return privateBlockchain;
+	}
+
+	public int getPrivateBranchLength() {
+		return privateBranchLength;
+	}
+
+	/** Update the public blockchain to be a copy of the private one, discarding the last item of the public one
 	 * 
 	 */
-	public void makeEqualBlockchains(TinyCoinNode tnode) {
+	public void copyPrivateBlockchain(TinyCoinNode tnode) {
 		List<Block> blockchain = tnode.getBlockchain();
 		blockchain.remove(blockchain.size() - 1); //remove last item
 		for (int i = privateBranchLength; i > 0; i--) {
 			Block b = privateBlockchain.get(privateBlockchain.size() - i);
 			blockchain.add(b);
+		}
+	}
+	
+	/** Update the private blockchain to be a copy of the public one, discarding the last item of the private one
+	 * 
+	 */
+	public void copyPublicBlockchain(TinyCoinNode tnode) {
+		List<Block> blockchain = tnode.getBlockchain();
+		if (privateBlockchain.size() != 0)
+			privateBlockchain.remove(privateBlockchain.size() - 1); //remove last item
+		for (int i = privateBranchLength; i >= 0; i--) {
+			Block b = blockchain.get(blockchain.size() - (i+1));
+			privateBlockchain.add(b);
 		}
 	}
 

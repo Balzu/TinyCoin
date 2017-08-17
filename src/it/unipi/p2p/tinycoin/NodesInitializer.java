@@ -9,6 +9,7 @@ public class NodesInitializer implements Control
 {
 	
 	private static final String PAR_PMINER = "pminer";
+	private static final String PAR_PSMINER = "p_self_miner";
 	private static final String PAR_PCPU = "pcpu";
 	private static final String PAR_PGPU = "pgpu";
 	private static final String PAR_PFPGA = "pfpga";
@@ -17,6 +18,7 @@ public class NodesInitializer implements Control
 	
 	// Probability that a netwOrk node is a miner. A node can be either a miner or a TinyCoin normal node
 	private double pminer;
+	private double psminer;
 	
 	// If the node is a miner, then it has different probabilities of mining through CPU, GPU, FPGA or ASIC 
 	private double pcpu;
@@ -29,6 +31,7 @@ public class NodesInitializer implements Control
 	public NodesInitializer(String prefix)
 	{
 		pminer = Configuration.getDouble(prefix + "." + PAR_PMINER);
+		psminer = pminer = Configuration.getDouble(prefix + "." + PAR_PSMINER);
 		pcpu = Configuration.getDouble(prefix + "." + PAR_PCPU);
 		pgpu = Configuration.getDouble(prefix + "." + PAR_PGPU);
 		pfpga = Configuration.getDouble(prefix + "." + PAR_PFPGA);
@@ -59,7 +62,13 @@ public class NodesInitializer implements Control
 			// se è anche un miner, allora eseguirà pure il protocollo del miner
 			double drandom = r.nextDouble();
 			if (drandom < pminer) { // the node is a miner
-				n.setNodetype(NodeType.MINER);
+				drandom = r.nextDouble();
+				
+				if (drandom < psminer) //Node is a selfish miner
+					n.setNodetype(NodeType.SELFISH_MINER);
+				else
+					n.setNodetype(NodeType.MINER);
+				
 				drandom = r.nextDouble();
 				if (drandom < pcpu)
 					n.setMtype(MinerType.CPU);

@@ -80,10 +80,15 @@ public class MinerProtocol implements CDProtocol{
 	@Override
 	public void nextCycle(Node node, int pid)
 	{
+		TinyCoinNode tnode = (TinyCoinNode)node;
+		
+		if (!tnode.isMiner())
+			return;
+		
 		if (isSelected()) 
 		{
 			setSelected(false);
-			TinyCoinNode tnode = (TinyCoinNode)node;
+			
 			Map<String, Transaction> transPool = tnode.getTransPool();
 			
 			// Create a new block and announce it to all the protocols of all the neighbors
@@ -95,7 +100,7 @@ public class MinerProtocol implements CDProtocol{
 					? null : blockchain.get(blockchain.size()-1).getBid();
 			List<Transaction> trans = new ArrayList<>(transInBlock);
 			Iterator<String> iter = tnode.getTransPool().keySet().iterator();
-			for (int i=0; i< maxTransPerBlock; i++) {
+			for (int i=0; i< transInBlock; i++) {
 				String key = iter.next();
 				Transaction t = transPool.get(key);
 				iter.remove();
