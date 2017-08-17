@@ -52,7 +52,7 @@ public class Oracle implements Control {
 		MinerType m1, m2;
 		m1 = getMinerType();       // Always choose one miner
 		TinyCoinNode mn1 = (TinyCoinNode)chooseMinerNode(m1);
-		if (mn1.isMiner())
+		if (mn1.isMiner())   //TODO: NullPointerException if in config file p_self_miner=0
 			((MinerProtocol)mn1.getProtocol(minerPid)).setSelected(true);	
 		else //selfish miner
 			((SelfishMinerProtocol)mn1.getProtocol(selfMinerPid)).setSelected(true);

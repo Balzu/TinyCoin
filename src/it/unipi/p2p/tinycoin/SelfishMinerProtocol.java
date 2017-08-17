@@ -205,8 +205,9 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 		String parent = privateBlockchain.size()== 0 
 				? null : privateBlockchain.get(privateBlockchain.size()-1).getBid();
 		List<Transaction> trans = new ArrayList<>(transInBlock);
+		//TODO: catch 'NoSUchElementException' in case TransPool is empty (cycle 1)
 		Iterator<String> iter = tnode.getTransPool().keySet().iterator();
-		for (int i=0; i< maxTransPerBlock; i++) {
+		for (int i=0; i< transInBlock; i++) {
 			String key = iter.next();
 			Transaction t = transPool.get(key);
 			iter.remove();

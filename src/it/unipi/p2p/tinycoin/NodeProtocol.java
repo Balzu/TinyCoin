@@ -23,7 +23,12 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 	private int smpid;
 	private boolean fork;
 	private Block forked;
+	private int numForks;
 	
+
+	public int getNumForks() {
+		return numForks;
+	}
 
 	public void setSmpid(int smpid) {
 		this.smpid = smpid;
@@ -40,6 +45,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 		smpid = Configuration.getPid(prefix + "." + PAR_SMINER);
 		fork = false;
 		forked = null;
+		numForks = 0;
 	}
 	
 	public void setFork(boolean fork) {
@@ -60,6 +66,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 			np.setSmpid(smpid);
 			np.setFork(false);
 			np.setForked(null);
+			np.setNumForks(0);
 		}
 		catch(CloneNotSupportedException  e) {
 			
@@ -208,9 +215,11 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 			    }
 				else if (blockchain.size() >= 2 && 
 						blockchain.get(blockchain.size()-2).getBid() == b.getParent() &&
-						blockchain.get(blockchain.size()-1).getBid() != b.getBid()) {
+						blockchain.get(blockchain.size()-1).getBid() != b.getBid() && 
+						fork == false) {
 					fork = true;
 					forked = b;
+					numForks++;
 				}
 				
 			}
@@ -222,6 +231,10 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 		
 	
 	
+	public void setNumForks(int numForks) {
+		this.numForks = numForks;
+	}
+
 	/** Sends a transaction t to the protocol pid of all the neighbor nodes
 	 * 
 	 * @param sender The sender node
