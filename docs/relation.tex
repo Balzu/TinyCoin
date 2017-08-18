@@ -35,10 +35,43 @@
 \setcounter{page}{2}
   
 \section{Overview}  
-In this project I have implemented a simplified version of Bitcoin, called TinyCoin, whose specifications are reported \href{https://elearning.di.unipi.it/pluginfile.php/14179/mod_assign/intro/SelfishMining.pdf}{here}
+In this project I have implemented a simplified version of Bitcoin, called TinyCoin, whose specifications are reported in [1]. In brief, TinyCoin distinguishing features are:
+\begin{itemize}
+\item each user has a single address that records the unspent amount at that node
+\item each transaction has a single input, a single output and does not include neither a digital signature nor scripts
+\item network nodes may be either normal nodes or miners. In turn, miners may be either honest or fraudolent (\textit{i.e. Selfish Miners}). Each miner has a type that reflects its mining hardware: CPU, GPU, FPGA or ASIC
+\item there is a centralized oracle that decides which miner has created a new block of hte blockchain at regular intervals of time. The decision is biased by the computational power of the miners. Each block is unique \\
+\end{itemize}
+The goal of this project is to evaluate the selfish mining strategy defined in [2] in TinyCoin. This strategy is evaluated by taking into account different metrics and parameters. The results and the discussion of this experiment are reported in the \textit{Results} section.
 
 \section{Design choices}
+In the following subsections I explain the design choices that I made. This is a high level description, indeed the classes of the project are described in the \textit{Implementation} section.
+\subsection{Network Nodes} Any node in the TinyCoin network is either a (normal) node, or a (honest) miner or a selfish miner.
+\begin{itemize}
+\item \textbf{node}: makes and receives transactions
+\item \textbf{miner}: makes and receives transactions and mines blocks of the blockchain. In particular, as soon as a new block is mined it is immediately advertized to all the nodes in the network.
+\item \textbf{selfish miner}: makes and receives transactions and mines blocks of the \textit{private} blockchain. A selfish miner indeed holds both a copy of the public blockchain, which is the ``official'' blockchain, and a copy of the private blockchain, which is the blockchain created and maintained collectively by all the selfish miners. At any time the two blockchains may be equal or may differ for some block. If they differ, it is because the selfish miners have discovered new blocks which have been added to the private blockchain but have not been disclosed to the public. Indeed when a selfish miner mines a new block, it does not naively publish it and add to the public blockchain. Instead, it applies a strategy that allows it and the other selfish miners to get the maximum revenue from their computing power. One of the strategies that they can follow is explained in [2]. In this project, I chosed to implement it. The pseudocode is reported in algorithm \ref{selfish_mining}
+\end{itemize}
 
+\begin{algorithm}
+\caption{Algorithm run by each selfish miner}\label{selfish_mining}
+\begin{algorithmic}[1]
+\State \textbf{on} Init
+\State \hspace{10pt} public chain $\gets$ publicly known blocks
+\State \hspace{10pt} private chain $\gets$ publicly known blocks
+\State \hspace{10pt} privateBranchLength $\gets$ 0
+\State \hspace{10pt} Mine at the head of the private chain
+\State 
+\State  
+\If  {(defaultPrimary == updateMsg.sender AND actualPrimary != defaultPrimary)}  
+\State backupDB.empty()
+\State partitionUrlsBetweenDB()
+\State backupDB.add(removedUrls)
+\State actualPrimary = defaultPrimary
+\State send backupDB to node defaultPrimary
+\EndIf 
+\end{algorithmic}
+\end{algorithm}
 
 alala
 
@@ -47,6 +80,7 @@ alala
 alala
 
 \section{Results}
+
 
 
 alala
@@ -58,6 +92,14 @@ alala
 
 
 \section{Limitations} 
+
+
+\section{References} 
+\begin{enumerate}
+\item \href{https://elearning.di.unipi.it/pluginfile.php/14179/mod_assign/intro/SelfishMining.pdf}{TinyCoin: Simulating mining strategies in a simplified Bitcoin Network}
+\item \href{https://elearning.di.unipi.it/pluginfile.php/14179/mod_assign/intro/MajorityisNotEnough.pdf}{Majority is not Enough: Bitcoin Mining is Vulnerable}
+\end{enumerate}
+
 
 
 \end{document}

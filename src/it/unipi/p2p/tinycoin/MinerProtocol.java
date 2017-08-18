@@ -91,7 +91,7 @@ public class MinerProtocol implements CDProtocol{
 			
 			Map<String, Transaction> transPool = tnode.getTransPool();
 			
-			// Create a new block and announce it to all the protocols of all the neighbors
+			// Create a new block and announce it to all the neighbors
 			minedBlocks++;
 			int transInBlock = Math.min(transPool.size(), maxTransPerBlock);
 			List<Block> blockchain = tnode.getBlockchain();

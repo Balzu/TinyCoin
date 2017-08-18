@@ -232,10 +232,10 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 	 */
 	public void copyPrivateBlockchain(TinyCoinNode tnode) {
 		List<Block> blockchain = tnode.getBlockchain();
-		blockchain.remove(blockchain.size() - 1); //remove last item
+		blockchain.remove(blockchain.size() - 1); //remove last item   //TODO also remove fees
 		for (int i = privateBranchLength; i > 0; i--) {
 			Block b = privateBlockchain.get(privateBlockchain.size() - i);
-			blockchain.add(b);
+			blockchain.add(b);         //TODO add fees of the new blocks
 		}
 	}
 	
