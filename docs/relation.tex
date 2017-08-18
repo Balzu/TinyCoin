@@ -7,6 +7,7 @@
 \usepackage[font=small,labelfont=bf]{caption}
 \usepackage[left=0.8in, right=0.8in, top=0.9in, bottom=1in]{geometry}
 \usepackage{hyperref} 
+%\usepackage{caption}
 \graphicspath{ {images/} }
 
 
@@ -54,24 +55,50 @@ In the following subsections I explain the design choices that I made. This is a
 \end{itemize}
 
 \begin{algorithm}
-\caption{Algorithm run by each selfish miner}\label{selfish_mining}
+\caption{Selfish Miner initialization}\label{selfish_mining}
 \begin{algorithmic}[1]
-\State \textbf{on} Init
-\State \hspace{10pt} public chain $\gets$ publicly known blocks
-\State \hspace{10pt} private chain $\gets$ publicly known blocks
-\State \hspace{10pt} privateBranchLength $\gets$ 0
-\State \hspace{10pt} Mine at the head of the private chain
-\State 
-\State  
-\If  {(defaultPrimary == updateMsg.sender AND actualPrimary != defaultPrimary)}  
-\State backupDB.empty()
-\State partitionUrlsBetweenDB()
-\State backupDB.add(removedUrls)
-\State actualPrimary = defaultPrimary
-\State send backupDB to node defaultPrimary
-\EndIf 
+\State public chain $\gets$ publicly known blocks
+\State private chain $\gets$ publicly known blocks
+\State privateBranchLength $\gets$ 0
+\State Mine at the head of the private chain 
 \end{algorithmic}
 \end{algorithm}
+
+\begin{algorithm}
+\caption{My pool found a block:}\label{selfish_mining}
+\begin{algorithmic}[1]
+\State $\Delta\textsubscript{prev}$ $\gets$ length(private chain) - length(public chain)
+\State append new block to private chain
+\State privateBranchLength $\gets$ privateBranchLength + 1
+\If{($\Delta\textsubscript{prev}$ = 0 AND privateBranchLength = 2)}  
+\State private chain $\gets$ public chain
+\State privateBranchLength $\gets$ 0
+\EndIf 
+\State Mine at the new head of the private chain 
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Others found a block:}\label{selfish_mining}
+\begin{algorithmic}[1]
+\State $\Delta\textsubscript{prev}$ $\gets$ length(private chain) - length(public chain)
+\State append new block to public chain
+\If{($\Delta\textsubscript{prev}$ = 0)}  
+\State private chain $\gets$ public chain
+\State privateBranchLength $\gets$ 0
+\ElsIf{($\Delta\textsubscript{prev}$ = 1)} 
+\State{publish last block of the private chain}
+\ElsIf{($\Delta\textsubscript{prev}$ = 2)}
+\State{publish all of the private chain}
+\State{privateBranchLength $\gets$ 0}
+\Else 
+\State{publish first unpublished block of the private blockchain} 
+\EndIf 
+\State Mine at the new head of the private chain 
+\end{algorithmic}
+\end{algorithm}
+
+
 
 alala
 
