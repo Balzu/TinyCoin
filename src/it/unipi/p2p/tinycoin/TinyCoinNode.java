@@ -13,7 +13,7 @@ public class TinyCoinNode extends GeneralNode{
 	private MinerType minerType;
 	private double balance;
 	private List<Block> blockchain; 
-    private Map<String, Transaction> transPool;
+        private Map<String, Transaction> transPool;
 	
 
 	public void setTransPool(Map<String, Transaction> transPool) {
