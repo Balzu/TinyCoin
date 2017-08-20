@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
+import it.unipi.p2p.tinycoin.protocols.NodeProtocol;
 import peersim.config.Configuration;
 import peersim.core.Control;
 import peersim.core.Network;

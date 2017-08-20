@@ -1,6 +1,8 @@
 package it.unipi.p2p.tinycoin;
 import java.util.Random;
 
+import it.unipi.p2p.tinycoin.protocols.MinerProtocol;
+import it.unipi.p2p.tinycoin.protocols.SelfishMinerProtocol;
 import peersim.config.Configuration;
 import peersim.core.Control;
 import peersim.core.Network;

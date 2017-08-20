@@ -1,9 +1,12 @@
-package it.unipi.p2p.tinycoin;
+package it.unipi.p2p.tinycoin.protocols;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import it.unipi.p2p.tinycoin.Block;
+import it.unipi.p2p.tinycoin.TinyCoinNode;
+import it.unipi.p2p.tinycoin.Transaction;
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
 import peersim.config.FastConfig;
@@ -194,7 +197,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 						(fork == true && forked.getBid() == b.getParent())) {
 					if (fork == true) {													
 						if (forked.getBid() == b.getParent()) {
-							blockchain.remove(blockchain.size()-1);
+							blockchain.remove(blockchain.size()-1); //TODO: remove reward
 							blockchain.add(forked);
 						}
 						fork = false;  // Fork is resolved, regardless of which is the extended branch
@@ -220,6 +223,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 					fork = true;
 					forked = b;
 					numForks++;
+					sendBlockToNeighbors(node, pid, b);	//TODO: added line, must check
 				}
 				
 			}

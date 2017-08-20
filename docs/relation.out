@@ -1,8 +1,15 @@
 \BOOKMARK [1][-]{section.1}{Overview}{}% 1
 \BOOKMARK [1][-]{section.2}{Design choices}{}% 2
 \BOOKMARK [2][-]{subsection.2.1}{Network Nodes}{section.2}% 3
-\BOOKMARK [1][-]{section.3}{Implementation}{}% 4
-\BOOKMARK [1][-]{section.4}{Results}{}% 5
-\BOOKMARK [1][-]{section.5}{Conclusion}{}% 6
-\BOOKMARK [1][-]{section.6}{Limitations}{}% 7
-\BOOKMARK [1][-]{section.7}{References}{}% 8
+\BOOKMARK [2][-]{subsection.2.2}{Blockchain, Blocks and Transactions}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.3}{Forks}{section.2}% 5
+\BOOKMARK [2][-]{subsection.2.4}{Network Latencies}{section.2}% 6
+\BOOKMARK [1][-]{section.3}{Implementation}{}% 7
+\BOOKMARK [2][-]{subsection.3.1}{Protocols}{section.3}% 8
+\BOOKMARK [2][-]{subsection.3.2}{Initializer}{section.3}% 9
+\BOOKMARK [2][-]{subsection.3.3}{Observer}{section.3}% 10
+\BOOKMARK [2][-]{subsection.3.4}{Other Classes}{section.3}% 11
+\BOOKMARK [1][-]{section.4}{Results}{}% 12
+\BOOKMARK [1][-]{section.5}{Conclusion}{}% 13
+\BOOKMARK [1][-]{section.6}{Limitations}{}% 14
+\BOOKMARK [1][-]{section.7}{References}{}% 15

@@ -1,9 +1,12 @@
-package it.unipi.p2p.tinycoin;
+package it.unipi.p2p.tinycoin.protocols;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import it.unipi.p2p.tinycoin.Block;
+import it.unipi.p2p.tinycoin.TinyCoinNode;
+import it.unipi.p2p.tinycoin.Transaction;
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
 import peersim.config.FastConfig;
