@@ -93,30 +93,13 @@ public class MinerProtocol implements CDProtocol{
 			setSelected(false);
 			
 			Map<String, Transaction> transPool = tnode.getTransPool();
-			
-			// Create a new block and announce it to all the neighbors
-			minedBlocks++;
-			int transInBlock = Math.min(transPool.size(), maxTransPerBlock);
 			List<Block> blockchain = tnode.getBlockchain();
-			String bid = "B" + node.getID() + minedBlocks;			
-			String parent = blockchain.size()== 0 
-					? null : blockchain.get(blockchain.size()-1).getBid();
-			List<Transaction> trans = new ArrayList<>(transInBlock);
-			Iterator<String> iter = tnode.getTransPool().keySet().iterator();
-			for (int i=0; i< transInBlock; i++) {
-				String key = iter.next();
-				Transaction t = transPool.get(key);
-				iter.remove();
-				trans.add(t);
-				if (t.getOutput() == node) {  //TODO check if test works
-					tnode.increaseBalance(t.getAmount());
-				}
-			}
-			Block b = new Block(bid, parent, tnode, trans, reward);	
+			// Create a new block and announce it to all the neighbors			
+			Block b = createBlock(transPool, tnode, blockchain);	
 			blockchain.add(b);
-			
-			sendBlockToNeighbors(node, nodeProtocol, b);	
-			
+			tnode.increaseBalance(b.getRevenueForBlock()); //the reward for mining the block is given to the miner
+			tnode.increaseBalance(b.getTransactionsAmountIfRecipient(tnode));
+			sendBlockToNeighbors(node, nodeProtocol, b);			
 			
 			System.out.println("Mined a block!");
 		}		
@@ -136,44 +119,28 @@ public class MinerProtocol implements CDProtocol{
 				((Transport)sender.getProtocol(FastConfig.getTransport(pid)))
 				.send(sender, peer, b, pid);
 			}
-	}
-
-	/*
-	@Override
-	public void processEvent(Node node, int pid, Object event)
-	{
-		// Only process the block with this protocol if this node is a honest miner
-		TinyCoinNode tnode = (TinyCoinNode)node;	
-		
-		if (!tnode.isMiner())
-			return;
-		
-		// If the parent field of the block is valid, then the honest miner adds the block 
-		// to its blockchain and removes the transactions inside the block from the pool.
-		// In other words, in case of fork only the first block is kept, while the latter is discarded
-		Block b = (Block)event;		
-		List<Block> blockchain = tnode.getBlockchain();
-		String last = blockchain.size()==0 ? null : blockchain.get(blockchain.size()-1).getBid();
-		if ( last == b.getParent()) {
-			blockchain.add(b);
-			Map<String, Transaction> transPool = tnode.getTransPool();
-			for (Transaction t : b.getTransactions()) {
-				// If this node is the recipient, update its balance
-				if (t.getOutput() == node) {  //TODO check if test works
-					tnode.increaseBalance(t.getAmount());
-				}
-				transPool.remove(t.getTid());
-			}
-			
-		// Finally (if block is valid) send the block to all the protocols of the neighbor nodes
-			for (pid=0; pid<node.protocolSize(); pid++) {
-				sendBlockToNeighbors(node, pid, b);	
-			}
-			
-		}		
-	}
-	*/
+	}	
 	
-
-
+		
+	private Block createBlock(Map<String, Transaction> transPool, TinyCoinNode tnode,
+			List<Block> blockchain) {
+		minedBlocks++;
+		int transInBlock = Math.min(transPool.size(), maxTransPerBlock);
+		String bid = "B" + tnode.getID() + minedBlocks;			
+		String parent = blockchain.size()== 0 
+				? null : blockchain.get(blockchain.size()-1).getBid();
+		List<Transaction> trans = new ArrayList<>(transInBlock);
+		//TODO: catch 'NoSUchElementException' in case TransPool is empty (cycle 1)
+		Iterator<String> iter = tnode.getTransPool().keySet().iterator();
+		for (int i=0; i< transInBlock; i++) {
+			String key = iter.next();
+			Transaction t = transPool.get(key);
+			iter.remove();
+			trans.add(t);
+			if (t.getOutput() == tnode) {  //TODO check if test works
+				tnode.increaseBalance(t.getAmount());
+			}
+		}
+		return new Block(bid, parent, tnode, trans, reward);	
+	}
 }

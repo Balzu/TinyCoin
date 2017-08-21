@@ -1,18 +1,27 @@
 # network size
-SIZE 1000
+#SIZE 1000
 
 # parameters of periodic execution
-CYCLES 50
-CYCLE_LENGTH 1000
+#CYCLES 50
+#CYCLE_LENGTH 1000
 
 # parameters of message transfer
-MINDELAY 0
-MAXDELAY 100
-DROP 0
+#MINDELAY 0
+#MAXDELAY 100
+#DROP 0
 
 # other parameters
-MAX_TRANS_PER_BLOCK 50
-REWARD 10
+#MAX_TRANS_PER_BLOCK 50
+#REWARD 10
+#TRANS_PROB 0.15
+#PROB_MINER 0.20
+#PROB_SMINER 0.50
+# PROB_CPU 0.10
+# PROB_GPU 0.30
+# PROB_FPGA 0.30
+# PROB_ASIC 0.30
+# PROB_2MINERS 0.05
+# REPETITION 1
 
 random.seed 1234567890
 network.size SIZE
@@ -26,7 +35,7 @@ protocol.node it.unipi.p2p.tinycoin.protocols.NodeProtocol
 protocol.node.linkable link
 protocol.node.step CYCLE_LENGTH
 protocol.node.transport tr
-protocol.node.transaction_prob 0.15
+protocol.node.transaction_prob TRANS_PROB
 protocol.node.self_miner_prot self_miner
 
 protocol.urt UniformRandomTransport
@@ -57,12 +66,12 @@ init.0.protocol link
 init.0.k 20
 
 init.1 it.unipi.p2p.tinycoin.initializer.NodesInitializer
-init.1.pminer 0.10                                        #tweak this!!
-init.1.p_self_miner 0.70  
-init.1.pcpu 0.10
-init.1.pgpu 0.30
-init.1.pfpga 0.30
-init.1.pasic 0.30
+init.1.pminer PROB_MINER                                        
+init.1.p_self_miner PROB_SMINER
+init.1.pcpu PROB_CPU
+init.1.pgpu PROB_GPU
+init.1.pfpga PROB_FPGA
+init.1.pasic PROB_ASIC
 init.1.max_balance 1000
 
 init.2 CDScheduler
@@ -78,7 +87,7 @@ init.4.protocol self_miner
 init.3.randstart
 
 control.oracle it.unipi.p2p.tinycoin.controls.Oracle
-control.oracle.prob_2_miners 0.10   
+control.oracle.prob_2_miners PROB_2MINERS   
 control.oracle.hr_cpu 50
 control.oracle.hr_gpu 1000
 control.oracle.hr_fpga 800
@@ -93,3 +102,4 @@ control.observer.node_protocol node
 control.observer.miner_protocol miner
 control.observer.selfish_miner_protocol self_miner
 control.observer.step CYCLE_LENGTH
+control.observer.repetition REPETITION

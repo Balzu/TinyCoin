@@ -1,6 +1,5 @@
 package it.unipi.p2p.tinycoin.protocols;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -145,28 +144,17 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 				int prevDiff = privateBlockchain.size() - blockchain.size();
 				if ( last == b.getParent()) {
 					blockchain.add(b);
+					tnode.increaseBalance(b.getTransactionsAmountIfRecipient(tnode));
+					if (b.getMiner() == tnode) // Added this check, should be redundant
+						tnode.increaseBalance(b.getRevenueForBlock());
 					switch (prevDiff) {
 					case(0):
 						if (onlyAddTheBlock(privateBlockchain, blockchain))
 							privateBlockchain.add(b);             //simply add one block
 						else 
 							smp.copyPublicBlockchain(tnode);      // delete last block of private blockchain to make the two exactly equal
-						
 						smp.setPrivateBranchLength(0);
-						sendBlockToNeighbors(node, pid, b);
-						/*
-						if (privateBranchLength == 0) {
-							//blockchain.add(b);
-							privateBlockchain.add(b);
-							 // Send to every node because the other self miners should immediately start mining on the new block
-							sendBlockToNeighbors(node, pid, b);
-						}
-						else { //TODO: qualcosa non va qui : 
-							smp.copyPublicBlockchain(tnode);      
-							smp.setPrivateBranchLength(0);
-							sendBlockToNeighbors(node, pid, b);
-						}		
-						*/				
+						sendBlockToNeighbors(node, pid, b);									
 						break;
 					case(1): 
 						Block sb = privateBlockchain.get(privateBlockchain.size() - 1);
@@ -188,8 +176,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 						break;
 					}
 				}
-			}
-			
+			}			
 			else {
 				// If the parent field of the block is valid, then the honest miner adds the block 
 				// to its blockchain and removes the transactions inside the block from the pool.				
@@ -197,21 +184,22 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 						(fork == true && forked.getBid() == b.getParent())) {
 					if (fork == true) {													
 						if (forked.getBid() == b.getParent()) {
-							blockchain.remove(blockchain.size()-1); //TODO: remove reward
+							Block lastb = blockchain.get(blockchain.size()-1);
+							blockchain.remove(lastb); 
+							tnode.decreaseBalance(lastb.getTransactionsAmountIfRecipient(tnode));
+							if (tnode == lastb.getMiner())
+								tnode.decreaseBalance(lastb.getRevenueForBlock());
 							blockchain.add(forked);
+							// No need to add the revenue for mining the block, because a honest miner always
+							// publishes ad takes the revenue as soon as it mines the block
+							tnode.increaseBalance(forked.getTransactionsAmountIfRecipient(tnode));
 						}
 						fork = false;  // Fork is resolved, regardless of which is the extended branch
 						forked = null;
 					}
 					blockchain.add(b);
-					Map<String, Transaction> transPool = tnode.getTransPool();
-					for (Transaction t : b.getTransactions()) {
-						// If this node is the recipient, update its balance
-						if (t.getOutput() == node) {  //TODO check if test works
-							tnode.increaseBalance(t.getAmount());
-						}
-						transPool.remove(t.getTid());
-					}
+					tnode.increaseBalance(b.getTransactionsAmountIfRecipient(tnode));
+					removeTransactionsFromPool(tnode, b);
 					
 				// Finally (if block is valid) send the block to all  the neighbor nodes				
 					sendBlockToNeighbors(node, pid, b);						
@@ -224,15 +212,18 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 					forked = b;
 					numForks++;
 					sendBlockToNeighbors(node, pid, b);	//TODO: added line, must check
-				}
-				
-			}
-			
-			
-		}
-		
+				}				
+			}			
+		}		
 	}
 		
+	
+	public void removeTransactionsFromPool(TinyCoinNode tn, Block b) {
+		Map<String, Transaction> transPool = tn.getTransPool();
+		for (Transaction t : b.getTransactions()) {						
+			transPool.remove(t.getTid());
+		}
+	}
 	
 	
 	public void setNumForks(int numForks) {

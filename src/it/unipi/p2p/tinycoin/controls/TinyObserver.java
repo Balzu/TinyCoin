@@ -1,10 +1,12 @@
-package it.unipi.p2p.tinycoin;
+package it.unipi.p2p.tinycoin.controls;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
+import it.unipi.p2p.tinycoin.Block;
+import it.unipi.p2p.tinycoin.TinyCoinNode;
 import it.unipi.p2p.tinycoin.protocols.NodeProtocol;
 import peersim.config.Configuration;
 import peersim.core.Control;
@@ -83,7 +85,12 @@ public class TinyObserver implements Control{
 			// Statistics about forks
 			int honests = Network.size()- sminers;
 			System.out.println("Honest nodes and miners are " + honests);
-			forks = forks / honests;  // take the avg
+			try {
+				forks = forks / honests;  // take the avg
+				}
+			catch(ArithmeticException e) {
+				forks = ((NodeProtocol)node.getProtocol(npid)).getNumForks();
+			}
 			System.out.println("Forks are " + forks + " at cycle " + cycle);
 			forkStats = new FileWriter("forks.dat", true);
 			bw = new BufferedWriter(forkStats);

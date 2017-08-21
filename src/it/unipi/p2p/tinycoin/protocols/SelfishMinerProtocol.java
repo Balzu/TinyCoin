@@ -201,7 +201,7 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 	
 	
 	//TODO: 'merged' tnode and node in tnode, should work but test
-	public Block createBlock(Map<String, Transaction> transPool, TinyCoinNode tnode) {
+	private Block createBlock(Map<String, Transaction> transPool, TinyCoinNode tnode) {
 		minedBlocks++;
 		int transInBlock = Math.min(transPool.size(), maxTransPerBlock);
 		String bid = "B" + tnode.getID() + minedBlocks;			
@@ -235,10 +235,17 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 	 */
 	public void copyPrivateBlockchain(TinyCoinNode tnode) {
 		List<Block> blockchain = tnode.getBlockchain();
-		blockchain.remove(blockchain.size() - 1); //remove last item   //TODO also remove fees
+		Block last = blockchain.get(blockchain.size() - 1);
+		blockchain.remove(last); //remove last item  
+		tnode.decreaseBalance(last.getTransactionsAmountIfRecipient(tnode));
+		if (tnode == last.getMiner())
+			tnode.decreaseBalance(last.getRevenueForBlock()); //remove block reward			
 		for (int i = privateBranchLength; i > 0; i--) {
 			Block b = privateBlockchain.get(privateBlockchain.size() - i);
-			blockchain.add(b);         //TODO add fees of the new blocks
+			blockchain.add(b); 
+			tnode.increaseBalance(b.getTransactionsAmountIfRecipient(tnode));
+			if (tnode == b.getMiner())
+				tnode.increaseBalance(b.getRevenueForBlock()); //get reward for the added block
 		}
 	}
 	
@@ -254,5 +261,8 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 			privateBlockchain.add(b);
 		}
 	}
-
+	
+	
+	
+	
 }

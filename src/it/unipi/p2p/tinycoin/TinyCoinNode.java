@@ -70,6 +70,10 @@ public class TinyCoinNode extends GeneralNode{
 	public void increaseBalance(double amount) {
 		balance += amount;
 	}
+	
+	public void decreaseBalance(double amount) {
+		balance -= amount;
+	}
 
 	@Override
 	public Object clone()
@@ -78,7 +82,7 @@ public class TinyCoinNode extends GeneralNode{
 		//TODO: devo lasciarli i 2 metodi sotto o non servono?
 		//clone.setNodetype(nodeType);
 		//clone.setMtype(this.getMtype());
-		clone.setTransPool(new HashMap<>());	//TODO ok inizializzarne una nuova? 
+		clone.setTransPool(new HashMap<>());
 		clone.setBlockchain(new ArrayList<>());
 		return clone;
 	}

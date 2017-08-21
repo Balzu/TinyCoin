@@ -1,6 +1,9 @@
-package it.unipi.p2p.tinycoin;
+package it.unipi.p2p.tinycoin.initializer;
 import java.util.Random;
 
+import it.unipi.p2p.tinycoin.MinerType;
+import it.unipi.p2p.tinycoin.NodeType;
+import it.unipi.p2p.tinycoin.TinyCoinNode;
 import peersim.config.Configuration;
 import peersim.core.Control;
 import peersim.core.Network;
@@ -46,7 +49,7 @@ public class NodesInitializer implements Control
 	@Override
 	public boolean execute()
 	{
-		if (pcpu + pgpu + pfpga + pasic != 100) {
+		if (pcpu + pgpu + pfpga + pasic != 1) {
 			System.err.println("The sum of the probabilities of the mining  HW must be equal to 100");
 			return true;		
 		}			
@@ -83,11 +86,8 @@ public class NodesInitializer implements Control
 			{
 				n.setNodetype(NodeType.NODE);
 				n.setMtype(null);
-				//TODO: disable miner protocol
-			}
-			
-		}
-		
+			}			
+		}		
 		return false;
 	}
 

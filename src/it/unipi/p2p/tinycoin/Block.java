@@ -47,5 +47,27 @@ public class Block {
 		return transactions;
 	}
 	
+	/** Gets the revenue for the block, defined as the fixed reward plus the fees for all
+	 *  the transactions 
+	 */
+	public double getRevenueForBlock() {
+		double revenue = reward;
+		List<Transaction> trans = transactions;
+		for (Transaction t: trans)
+			revenue += t.getFee();
+		return revenue;
+	}
+	
+	/** Gets the amount of coins destined to the TinyCoinNode tn in the transactions of the Block.
+	 */
+	public double getTransactionsAmountIfRecipient(TinyCoinNode tn)
+	{
+		int amount = 0;		
+		for (Transaction t: transactions) {
+			if (t.getOutput() == tn)
+				amount += t.getAmount();
+		}
+		return amount;		
+	}	
 
 }
