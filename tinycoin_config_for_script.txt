@@ -27,7 +27,7 @@ random.seed 1234567890
 network.size SIZE
 network.node TinyCoinNode
 simulation.endtime CYCLE_LENGTH*CYCLES
-simulation.logtime CYCLE
+simulation.logtime CYCLE_LENGTH
 
 protocol.link IdleProtocol
 

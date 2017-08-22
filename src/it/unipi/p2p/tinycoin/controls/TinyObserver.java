@@ -17,10 +17,12 @@ public class TinyObserver implements Control{
 	private static final String PAR_NODE_PROT = "node_protocol";
 	private static final String PAR_MINER_PROT = "miner_protocol";
 	private static final String PAR_SMINER_PROT = "selfish_miner_protocol";
+	private static final String PAR_REPETITION = "repetition";
 	
 	private final int npid;
 	private final int mpid;
 	private final int smpid;
+	private final int repetition;
 	
 	private int cycle;
 	private TinyCoinNode node;
@@ -30,6 +32,7 @@ public class TinyObserver implements Control{
 		npid = Configuration.getPid(prefix + "." + PAR_NODE_PROT);
 		mpid = Configuration.getPid(prefix + "." + PAR_MINER_PROT);
 		smpid = Configuration.getPid(prefix + "." + PAR_SMINER_PROT);
+		repetition = Configuration.getInt(prefix + "." + PAR_REPETITION);
 		cycle = 0;
 	}
 
@@ -54,14 +57,14 @@ public class TinyObserver implements Control{
 			{  // clean stat files and initialize	
 				node = (TinyCoinNode)Network.get(0);    // To be sure to always consider the blockchain of the same node
 				
-				forkStats = new FileWriter("forks.dat", false);
+				forkStats = new FileWriter("docs/statistics/forks_R" + repetition + ".dat", false);
 				bw = new BufferedWriter(forkStats);
-				bw.write("Forks_number" + " " + "Cycle \n");	
+				bw.write("# Forks_number" + " " + "Cycle \n");	
 				bw.close();
 				
-				blockchainStats = new FileWriter("blockchain.dat", false);
+				blockchainStats = new FileWriter("docs/statistics/blockchain_R" + repetition + ".dat", false);
 				bw = new BufferedWriter(blockchainStats);
-				bw.write("Honest_blocks" + " " + "Fraudolent_blocks" + " " + "Cycle \n");				
+				bw.write("# Honest_blocks" + " " + "Fraudolent_blocks" + " " + "Cycle \n");				
 				bw.close();
 			}
 			
@@ -92,7 +95,7 @@ public class TinyObserver implements Control{
 				forks = ((NodeProtocol)node.getProtocol(npid)).getNumForks();
 			}
 			System.out.println("Forks are " + forks + " at cycle " + cycle);
-			forkStats = new FileWriter("forks.dat", true);
+			forkStats = new FileWriter("docs/statistics/forks_R" + repetition + ".dat", true);
 			bw = new BufferedWriter(forkStats);
 			bw.write(forks + "            " + cycle + "\n");
 			bw.close();
@@ -107,7 +110,7 @@ public class TinyObserver implements Control{
 				else
 					honestBlocks++;
 			}
-			blockchainStats = new FileWriter("blockchain.dat", true);
+			blockchainStats = new FileWriter("docs/statistics/blockchain_R" + repetition + ".dat", true);
 			bw = new BufferedWriter(blockchainStats);
 			bw.write(honestBlocks + "            " + 
 					fraudolentBlocks + "            "  + cycle + "\n");

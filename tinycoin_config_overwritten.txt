@@ -1,14 +1,14 @@
 # network size
-#SIZE 1000
+#1000 1000
 
 # parameters of periodic execution
-#CYCLES 50
-#CYCLE_LENGTH 1000
+#20 50
+#1000 1000
 
 # parameters of message transfer
-#MINDELAY 0
-#MAXDELAY 100
-#DROP 0
+#0 0
+#0 100
+#0 0
 
 # other parameters
 #50 50
@@ -21,35 +21,35 @@
 # 0.30 0.30
 # 0.30 0.30
 # 0.05 0.05
-# 1 1
+# 2 1
 
 random.seed 1234567890
-network.size SIZE
+network.size 1000
 network.node TinyCoinNode
-simulation.endtime CYCLE_LENGTH*CYCLES
-simulation.logtime CYCLE
+simulation.endtime 1000*20
+simulation.logtime 1000
 
 protocol.link IdleProtocol
 
 protocol.node it.unipi.p2p.tinycoin.protocols.NodeProtocol
 protocol.node.linkable link
-protocol.node.step CYCLE_LENGTH
+protocol.node.step 1000
 protocol.node.transport tr
 protocol.node.transaction_prob 0.15
 protocol.node.self_miner_prot self_miner
 
 protocol.urt UniformRandomTransport
-protocol.urt.mindelay (CYCLE_LENGTH*MINDELAY)/100
-protocol.urt.maxdelay (CYCLE_LENGTH*MAXDELAY)/100
+protocol.urt.mindelay (1000*0)/100
+protocol.urt.maxdelay (1000*0)/100
 
 protocol.tr UnreliableTransport
 protocol.tr.transport urt
-protocol.tr.drop DROP
+protocol.tr.drop 0
 
 protocol.miner it.unipi.p2p.tinycoin.protocols.MinerProtocol
 protocol.miner.linkable link
 protocol.miner.node_protocol node
-protocol.miner.step CYCLE_LENGTH
+protocol.miner.step 1000
 protocol.miner.max_trans_block 50
 protocol.miner.reward 10
 
@@ -58,7 +58,7 @@ protocol.self_miner.max_trans_block 50
 protocol.self_miner.reward 10
 protocol.self_miner.node_protocol node
 protocol.self_miner.linkable link
-protocol.self_miner.step CYCLE_LENGTH
+protocol.self_miner.step 1000
 protocol.self_miner.transport tr
 
 init.0 WireKOut
@@ -95,536 +95,11 @@ control.oracle.hr_asic 1000000
 control.oracle.miner_protocol miner
 control.oracle.self_miner_protocol self_miner
 # The oracle will be called once every CICLE_LENGTH time points. In the project specification, it should follow a distribution? But how to implement?
-control.oracle.step CYCLE_LENGTH	
+control.oracle.step 1000	
 
 control.observer it.unipi.p2p.tinycoin.controls.TinyObserver
 control.observer.node_protocol node
 control.observer.miner_protocol miner
 control.observer.selfish_miner_protocol self_miner
-control.observer.step CYCLE_LENGTH
-control.observer.repetition 1
-# network size
-#SIZE 1000
-
-# parameters of periodic execution
-#CYCLES 50
-#CYCLE_LENGTH 1000
-
-# parameters of message transfer
-#MINDELAY 0
-#MAXDELAY 100
-#DROP 0
-
-# other parameters
-#50 50
-#10 10
-#0.15 0.15
-#0.30 0.20
-#0.30 0.50
-# 0.10 0.10
-# 0.30 0.30
-# 0.30 0.30
-# 0.30 0.30
-# 0.05 0.05
-# 1 1
-
-random.seed 1234567890
-network.size SIZE
-network.node TinyCoinNode
-simulation.endtime CYCLE_LENGTH*CYCLES
-simulation.logtime CYCLE
-
-protocol.link IdleProtocol
-
-protocol.node it.unipi.p2p.tinycoin.protocols.NodeProtocol
-protocol.node.linkable link
-protocol.node.step CYCLE_LENGTH
-protocol.node.transport tr
-protocol.node.transaction_prob 0.15
-protocol.node.self_miner_prot self_miner
-
-protocol.urt UniformRandomTransport
-protocol.urt.mindelay (CYCLE_LENGTH*MINDELAY)/100
-protocol.urt.maxdelay (CYCLE_LENGTH*MAXDELAY)/100
-
-protocol.tr UnreliableTransport
-protocol.tr.transport urt
-protocol.tr.drop DROP
-
-protocol.miner it.unipi.p2p.tinycoin.protocols.MinerProtocol
-protocol.miner.linkable link
-protocol.miner.node_protocol node
-protocol.miner.step CYCLE_LENGTH
-protocol.miner.max_trans_block 50
-protocol.miner.reward 10
-
-protocol.self_miner it.unipi.p2p.tinycoin.protocols.SelfishMinerProtocol
-protocol.self_miner.max_trans_block 50
-protocol.self_miner.reward 10
-protocol.self_miner.node_protocol node
-protocol.self_miner.linkable link
-protocol.self_miner.step CYCLE_LENGTH
-protocol.self_miner.transport tr
-
-init.0 WireKOut
-init.0.protocol link
-init.0.k 20
-
-init.1 it.unipi.p2p.tinycoin.initializer.NodesInitializer
-init.1.pminer 0.30                                        
-init.1.p_self_miner 0.30
-init.1.pcpu 0.10
-init.1.pgpu 0.30
-init.1.pfpga 0.30
-init.1.pasic 0.30
-init.1.max_balance 1000
-
-init.2 CDScheduler
-init.2.protocol node
-init.2.randstart
-
-init.3 CDScheduler
-init.3.protocol miner
-init.3.randstart
-
-init.4 CDScheduler
-init.4.protocol self_miner
-init.3.randstart
-
-control.oracle it.unipi.p2p.tinycoin.controls.Oracle
-control.oracle.prob_2_miners 0.05   
-control.oracle.hr_cpu 50
-control.oracle.hr_gpu 1000
-control.oracle.hr_fpga 800
-control.oracle.hr_asic 1000000
-control.oracle.miner_protocol miner
-control.oracle.self_miner_protocol self_miner
-# The oracle will be called once every CICLE_LENGTH time points. In the project specification, it should follow a distribution? But how to implement?
-control.oracle.step CYCLE_LENGTH	
-
-control.observer it.unipi.p2p.tinycoin.controls.TinyObserver
-control.observer.node_protocol node
-control.observer.miner_protocol miner
-control.observer.selfish_miner_protocol self_miner
-control.observer.step CYCLE_LENGTH
-control.observer.repetition 1
-# network size
-#SIZE 1000
-
-# parameters of periodic execution
-#CYCLES 50
-#CYCLE_LENGTH 1000
-
-# parameters of message transfer
-#MINDELAY 0
-#MAXDELAY 100
-#DROP 0
-
-# other parameters
-#50 50
-#10 10
-#0.15 0.15
-#0.30 0.20
-#0.50 0.50
-# 0.10 0.10
-# 0.30 0.30
-# 0.30 0.30
-# 0.30 0.30
-# 0.05 0.05
-# 1 1
-
-random.seed 1234567890
-network.size SIZE
-network.node TinyCoinNode
-simulation.endtime CYCLE_LENGTH*CYCLES
-simulation.logtime CYCLE
-
-protocol.link IdleProtocol
-
-protocol.node it.unipi.p2p.tinycoin.protocols.NodeProtocol
-protocol.node.linkable link
-protocol.node.step CYCLE_LENGTH
-protocol.node.transport tr
-protocol.node.transaction_prob 0.15
-protocol.node.self_miner_prot self_miner
-
-protocol.urt UniformRandomTransport
-protocol.urt.mindelay (CYCLE_LENGTH*MINDELAY)/100
-protocol.urt.maxdelay (CYCLE_LENGTH*MAXDELAY)/100
-
-protocol.tr UnreliableTransport
-protocol.tr.transport urt
-protocol.tr.drop DROP
-
-protocol.miner it.unipi.p2p.tinycoin.protocols.MinerProtocol
-protocol.miner.linkable link
-protocol.miner.node_protocol node
-protocol.miner.step CYCLE_LENGTH
-protocol.miner.max_trans_block 50
-protocol.miner.reward 10
-
-protocol.self_miner it.unipi.p2p.tinycoin.protocols.SelfishMinerProtocol
-protocol.self_miner.max_trans_block 50
-protocol.self_miner.reward 10
-protocol.self_miner.node_protocol node
-protocol.self_miner.linkable link
-protocol.self_miner.step CYCLE_LENGTH
-protocol.self_miner.transport tr
-
-init.0 WireKOut
-init.0.protocol link
-init.0.k 20
-
-init.1 it.unipi.p2p.tinycoin.initializer.NodesInitializer
-init.1.pminer 0.30                                        
-init.1.p_self_miner 0.50
-init.1.pcpu 0.10
-init.1.pgpu 0.30
-init.1.pfpga 0.30
-init.1.pasic 0.30
-init.1.max_balance 1000
-
-init.2 CDScheduler
-init.2.protocol node
-init.2.randstart
-
-init.3 CDScheduler
-init.3.protocol miner
-init.3.randstart
-
-init.4 CDScheduler
-init.4.protocol self_miner
-init.3.randstart
-
-control.oracle it.unipi.p2p.tinycoin.controls.Oracle
-control.oracle.prob_2_miners 0.05   
-control.oracle.hr_cpu 50
-control.oracle.hr_gpu 1000
-control.oracle.hr_fpga 800
-control.oracle.hr_asic 1000000
-control.oracle.miner_protocol miner
-control.oracle.self_miner_protocol self_miner
-# The oracle will be called once every CICLE_LENGTH time points. In the project specification, it should follow a distribution? But how to implement?
-control.oracle.step CYCLE_LENGTH	
-
-control.observer it.unipi.p2p.tinycoin.controls.TinyObserver
-control.observer.node_protocol node
-control.observer.miner_protocol miner
-control.observer.selfish_miner_protocol self_miner
-control.observer.step CYCLE_LENGTH
-control.observer.repetition 1
-# network size
-#SIZE 1000
-
-# parameters of periodic execution
-#CYCLES 50
-#CYCLE_LENGTH 1000
-
-# parameters of message transfer
-#MINDELAY 0
-#MAXDELAY 100
-#DROP 0
-
-# other parameters
-#50 50
-#10 10
-#0.15 0.15
-#0.30 0.20
-#0.70 0.50
-# 0.10 0.10
-# 0.30 0.30
-# 0.30 0.30
-# 0.30 0.30
-# 0.05 0.05
-# 1 1
-
-random.seed 1234567890
-network.size SIZE
-network.node TinyCoinNode
-simulation.endtime CYCLE_LENGTH*CYCLES
-simulation.logtime CYCLE
-
-protocol.link IdleProtocol
-
-protocol.node it.unipi.p2p.tinycoin.protocols.NodeProtocol
-protocol.node.linkable link
-protocol.node.step CYCLE_LENGTH
-protocol.node.transport tr
-protocol.node.transaction_prob 0.15
-protocol.node.self_miner_prot self_miner
-
-protocol.urt UniformRandomTransport
-protocol.urt.mindelay (CYCLE_LENGTH*MINDELAY)/100
-protocol.urt.maxdelay (CYCLE_LENGTH*MAXDELAY)/100
-
-protocol.tr UnreliableTransport
-protocol.tr.transport urt
-protocol.tr.drop DROP
-
-protocol.miner it.unipi.p2p.tinycoin.protocols.MinerProtocol
-protocol.miner.linkable link
-protocol.miner.node_protocol node
-protocol.miner.step CYCLE_LENGTH
-protocol.miner.max_trans_block 50
-protocol.miner.reward 10
-
-protocol.self_miner it.unipi.p2p.tinycoin.protocols.SelfishMinerProtocol
-protocol.self_miner.max_trans_block 50
-protocol.self_miner.reward 10
-protocol.self_miner.node_protocol node
-protocol.self_miner.linkable link
-protocol.self_miner.step CYCLE_LENGTH
-protocol.self_miner.transport tr
-
-init.0 WireKOut
-init.0.protocol link
-init.0.k 20
-
-init.1 it.unipi.p2p.tinycoin.initializer.NodesInitializer
-init.1.pminer 0.30                                        
-init.1.p_self_miner 0.70
-init.1.pcpu 0.10
-init.1.pgpu 0.30
-init.1.pfpga 0.30
-init.1.pasic 0.30
-init.1.max_balance 1000
-
-init.2 CDScheduler
-init.2.protocol node
-init.2.randstart
-
-init.3 CDScheduler
-init.3.protocol miner
-init.3.randstart
-
-init.4 CDScheduler
-init.4.protocol self_miner
-init.3.randstart
-
-control.oracle it.unipi.p2p.tinycoin.controls.Oracle
-control.oracle.prob_2_miners 0.05   
-control.oracle.hr_cpu 50
-control.oracle.hr_gpu 1000
-control.oracle.hr_fpga 800
-control.oracle.hr_asic 1000000
-control.oracle.miner_protocol miner
-control.oracle.self_miner_protocol self_miner
-# The oracle will be called once every CICLE_LENGTH time points. In the project specification, it should follow a distribution? But how to implement?
-control.oracle.step CYCLE_LENGTH	
-
-control.observer it.unipi.p2p.tinycoin.controls.TinyObserver
-control.observer.node_protocol node
-control.observer.miner_protocol miner
-control.observer.selfish_miner_protocol self_miner
-control.observer.step CYCLE_LENGTH
-control.observer.repetition 1
-# network size
-#SIZE 1000
-
-# parameters of periodic execution
-#CYCLES 50
-#CYCLE_LENGTH 1000
-
-# parameters of message transfer
-#MINDELAY 0
-#MAXDELAY 100
-#DROP 0
-
-# other parameters
-#50 50
-#10 10
-#0.15 0.15
-#0.30 0.20
-#0.90 0.50
-# 0.10 0.10
-# 0.30 0.30
-# 0.30 0.30
-# 0.30 0.30
-# 0.05 0.05
-# 1 1
-
-random.seed 1234567890
-network.size SIZE
-network.node TinyCoinNode
-simulation.endtime CYCLE_LENGTH*CYCLES
-simulation.logtime CYCLE
-
-protocol.link IdleProtocol
-
-protocol.node it.unipi.p2p.tinycoin.protocols.NodeProtocol
-protocol.node.linkable link
-protocol.node.step CYCLE_LENGTH
-protocol.node.transport tr
-protocol.node.transaction_prob 0.15
-protocol.node.self_miner_prot self_miner
-
-protocol.urt UniformRandomTransport
-protocol.urt.mindelay (CYCLE_LENGTH*MINDELAY)/100
-protocol.urt.maxdelay (CYCLE_LENGTH*MAXDELAY)/100
-
-protocol.tr UnreliableTransport
-protocol.tr.transport urt
-protocol.tr.drop DROP
-
-protocol.miner it.unipi.p2p.tinycoin.protocols.MinerProtocol
-protocol.miner.linkable link
-protocol.miner.node_protocol node
-protocol.miner.step CYCLE_LENGTH
-protocol.miner.max_trans_block 50
-protocol.miner.reward 10
-
-protocol.self_miner it.unipi.p2p.tinycoin.protocols.SelfishMinerProtocol
-protocol.self_miner.max_trans_block 50
-protocol.self_miner.reward 10
-protocol.self_miner.node_protocol node
-protocol.self_miner.linkable link
-protocol.self_miner.step CYCLE_LENGTH
-protocol.self_miner.transport tr
-
-init.0 WireKOut
-init.0.protocol link
-init.0.k 20
-
-init.1 it.unipi.p2p.tinycoin.initializer.NodesInitializer
-init.1.pminer 0.30                                        
-init.1.p_self_miner 0.90
-init.1.pcpu 0.10
-init.1.pgpu 0.30
-init.1.pfpga 0.30
-init.1.pasic 0.30
-init.1.max_balance 1000
-
-init.2 CDScheduler
-init.2.protocol node
-init.2.randstart
-
-init.3 CDScheduler
-init.3.protocol miner
-init.3.randstart
-
-init.4 CDScheduler
-init.4.protocol self_miner
-init.3.randstart
-
-control.oracle it.unipi.p2p.tinycoin.controls.Oracle
-control.oracle.prob_2_miners 0.05   
-control.oracle.hr_cpu 50
-control.oracle.hr_gpu 1000
-control.oracle.hr_fpga 800
-control.oracle.hr_asic 1000000
-control.oracle.miner_protocol miner
-control.oracle.self_miner_protocol self_miner
-# The oracle will be called once every CICLE_LENGTH time points. In the project specification, it should follow a distribution? But how to implement?
-control.oracle.step CYCLE_LENGTH	
-
-control.observer it.unipi.p2p.tinycoin.controls.TinyObserver
-control.observer.node_protocol node
-control.observer.miner_protocol miner
-control.observer.selfish_miner_protocol self_miner
-control.observer.step CYCLE_LENGTH
-control.observer.repetition 1
-# network size
-#SIZE 1000
-
-# parameters of periodic execution
-#CYCLES 50
-#CYCLE_LENGTH 1000
-
-# parameters of message transfer
-#MINDELAY 0
-#MAXDELAY 100
-#DROP 0
-
-# other parameters
-#50 50
-#10 10
-#0.15 0.15
-#0.30 0.20
-#1.00 0.50
-# 0.10 0.10
-# 0.30 0.30
-# 0.30 0.30
-# 0.30 0.30
-# 0.05 0.05
-# 1 1
-
-random.seed 1234567890
-network.size SIZE
-network.node TinyCoinNode
-simulation.endtime CYCLE_LENGTH*CYCLES
-simulation.logtime CYCLE
-
-protocol.link IdleProtocol
-
-protocol.node it.unipi.p2p.tinycoin.protocols.NodeProtocol
-protocol.node.linkable link
-protocol.node.step CYCLE_LENGTH
-protocol.node.transport tr
-protocol.node.transaction_prob 0.15
-protocol.node.self_miner_prot self_miner
-
-protocol.urt UniformRandomTransport
-protocol.urt.mindelay (CYCLE_LENGTH*MINDELAY)/100
-protocol.urt.maxdelay (CYCLE_LENGTH*MAXDELAY)/100
-
-protocol.tr UnreliableTransport
-protocol.tr.transport urt
-protocol.tr.drop DROP
-
-protocol.miner it.unipi.p2p.tinycoin.protocols.MinerProtocol
-protocol.miner.linkable link
-protocol.miner.node_protocol node
-protocol.miner.step CYCLE_LENGTH
-protocol.miner.max_trans_block 50
-protocol.miner.reward 10
-
-protocol.self_miner it.unipi.p2p.tinycoin.protocols.SelfishMinerProtocol
-protocol.self_miner.max_trans_block 50
-protocol.self_miner.reward 10
-protocol.self_miner.node_protocol node
-protocol.self_miner.linkable link
-protocol.self_miner.step CYCLE_LENGTH
-protocol.self_miner.transport tr
-
-init.0 WireKOut
-init.0.protocol link
-init.0.k 20
-
-init.1 it.unipi.p2p.tinycoin.initializer.NodesInitializer
-init.1.pminer 0.30                                        
-init.1.p_self_miner 1.00
-init.1.pcpu 0.10
-init.1.pgpu 0.30
-init.1.pfpga 0.30
-init.1.pasic 0.30
-init.1.max_balance 1000
-
-init.2 CDScheduler
-init.2.protocol node
-init.2.randstart
-
-init.3 CDScheduler
-init.3.protocol miner
-init.3.randstart
-
-init.4 CDScheduler
-init.4.protocol self_miner
-init.3.randstart
-
-control.oracle it.unipi.p2p.tinycoin.controls.Oracle
-control.oracle.prob_2_miners 0.05   
-control.oracle.hr_cpu 50
-control.oracle.hr_gpu 1000
-control.oracle.hr_fpga 800
-control.oracle.hr_asic 1000000
-control.oracle.miner_protocol miner
-control.oracle.self_miner_protocol self_miner
-# The oracle will be called once every CICLE_LENGTH time points. In the project specification, it should follow a distribution? But how to implement?
-control.oracle.step CYCLE_LENGTH	
-
-control.observer it.unipi.p2p.tinycoin.controls.TinyObserver
-control.observer.node_protocol node
-control.observer.miner_protocol miner
-control.observer.selfish_miner_protocol self_miner
-control.observer.step CYCLE_LENGTH
-control.observer.repetition 1
+control.observer.step 1000
+control.observer.repetition 2
