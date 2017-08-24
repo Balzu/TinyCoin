@@ -6,8 +6,8 @@
 #1000 1000
 
 # parameters of message transfer
-#0 0
-#0 100
+#MIN90 0
+#MAX90 100
 #0 0
 
 # other parameters
@@ -39,8 +39,8 @@ protocol.node.transaction_prob 0.15
 protocol.node.self_miner_prot self_miner
 
 protocol.urt UniformRandomTransport
-protocol.urt.mindelay (1000*0)/100
-protocol.urt.maxdelay (1000*0)/100
+protocol.urt.mindelay (1000*90)/100
+protocol.urt.maxdelay (1000*90)/100
 
 protocol.tr UnreliableTransport
 protocol.tr.transport urt
@@ -103,3 +103,10 @@ control.observer.miner_protocol miner
 control.observer.selfish_miner_protocol self_miner
 control.observer.step 1000
 control.observer.repetition 2
+control.observer.p_self_miner 0.10
+control.observer.hr_cpu 50
+control.observer.hr_gpu 1000
+control.observer.hr_fpga 800
+control.observer.hr_asic 1000000
+control.observer.only_latency true	
+control.observer.delay 90

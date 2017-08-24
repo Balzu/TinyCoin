@@ -27,6 +27,8 @@ public class MinerProtocol implements CDProtocol{
 	private double reward;
 	private int nodeProtocol;
 	
+
+	
 	public boolean isSelected() {
 		return selected;
 	}

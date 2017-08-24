@@ -13,6 +13,9 @@ DROP 0
 # other parameters
 MAX_TRANS_PER_BLOCK 50
 REWARD 10
+PROB_SMINER 0.3
+ONLYLATENCY true
+DELAY 10
 
 random.seed 1234567890
 network.size SIZE
@@ -30,8 +33,8 @@ protocol.node.transaction_prob 0.15
 protocol.node.self_miner_prot self_miner
 
 protocol.urt UniformRandomTransport
-protocol.urt.mindelay (CYCLE_LENGTH*MINDELAY)/100
-protocol.urt.maxdelay (CYCLE_LENGTH*MAXDELAY)/100
+protocol.urt.mindelay (CYCLE_LENGTH*DELAY)/100
+protocol.urt.maxdelay (CYCLE_LENGTH*DELAY)/100
 
 protocol.tr UnreliableTransport
 protocol.tr.transport urt
@@ -57,8 +60,8 @@ init.0.protocol link
 init.0.k 20
 
 init.1 it.unipi.p2p.tinycoin.initializer.NodesInitializer
-init.1.pminer 0.10                                        #tweak this!!
-init.1.p_self_miner 0.70  
+init.1.pminer 0.20                                        #tweak this!!
+init.1.p_self_miner PROB_SMINER 
 init.1.pcpu 0.10
 init.1.pgpu 0.30
 init.1.pfpga 0.30
@@ -92,4 +95,12 @@ control.observer it.unipi.p2p.tinycoin.controls.TinyObserver
 control.observer.node_protocol node
 control.observer.miner_protocol miner
 control.observer.selfish_miner_protocol self_miner
+control.observer.repetition 1
+control.observer.p_self_miner PROB_SMINER
 control.observer.step CYCLE_LENGTH
+control.observer.hr_cpu 50
+control.observer.hr_gpu 1000
+control.observer.hr_fpga 800
+control.observer.hr_asic 1000000
+control.observer.only_latency true
+control.observer.delay DELAY

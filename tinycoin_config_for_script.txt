@@ -39,8 +39,8 @@ protocol.node.transaction_prob TRANS_PROB
 protocol.node.self_miner_prot self_miner
 
 protocol.urt UniformRandomTransport
-protocol.urt.mindelay (CYCLE_LENGTH*MINDELAY)/100
-protocol.urt.maxdelay (CYCLE_LENGTH*MAXDELAY)/100
+protocol.urt.mindelay (CYCLE_LENGTH*DELAY)/100
+protocol.urt.maxdelay (CYCLE_LENGTH*DELAY)/100
 
 protocol.tr UnreliableTransport
 protocol.tr.transport urt
@@ -103,3 +103,10 @@ control.observer.miner_protocol miner
 control.observer.selfish_miner_protocol self_miner
 control.observer.step CYCLE_LENGTH
 control.observer.repetition REPETITION
+control.observer.p_self_miner PROB_SMINER
+control.observer.hr_cpu 50
+control.observer.hr_gpu 1000
+control.observer.hr_fpga 800
+control.observer.hr_asic 1000000
+control.observer.only_latency ONLYLATENCY	
+control.observer.delay DELAY
