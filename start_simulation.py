@@ -9,7 +9,7 @@ else:
 
 
 size = '1000'
-cycles = '20'
+cycles = '30'
 cycle_length = '1000'
 drop = '0'
 max_trans_per_block = '50'
@@ -81,3 +81,5 @@ for p in prob_sminer:
     
 for d in delay:
     os.system('python build_avg_statistics.py d' + d)
+    
+os.system('python plot_avg_statistics.py')

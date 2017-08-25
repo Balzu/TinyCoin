@@ -1,6 +1,7 @@
 \documentclass{article} 
 \usepackage{todonotes}
 \usepackage{graphicx}
+\usepackage{grffile}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
 \usepackage{float}
@@ -43,10 +44,10 @@ In this project I have implemented a simplified version of Bitcoin, called TinyC
 \item network nodes may be either normal nodes or miners. In turn, miners may be either honest or fraudolent (\textit{i.e. Selfish Miners}). Each miner has a type that reflects its mining hardware: CPU, GPU, FPGA or ASIC
 \item there is a centralized oracle that decides which miner has created a new block of the blockchain at regular intervals of time. The decision is biased by the computational power of the miners. Each block is unique. \\
 \end{itemize}
-The goal of this project is to evaluate the selfish mining strategy defined in [2] in TinyCoin. This strategy is evaluated by taking into account different metrics and parameters. The results and the discussion of this experiment are reported in the \textit{Results} section.
+The goal of this project is to evaluate the selfish mining strategy defined in [2] in TinyCoin. This strategy is evaluated by taking into account different metrics and parameters. The results and the discussion of this simulation are reported in the \textit{Experimental Results} section.
 
 \section{Design choices}
-In the following subsections I explain the design choices that I made. This is a high level description, indeed the classes of the project are described in the \textit{Implementation} section.
+In the following paragraphs I explain the design choices that I made. This is a high level description, indeed the classes of the project are described in the \textit{Implementation} section.
 
 
 
@@ -54,7 +55,7 @@ In the following subsections I explain the design choices that I made. This is a
 \begin{itemize}
 \item \textbf{node}: makes and receives transactions
 \item \textbf{miner}: makes and receives transactions and mines blocks of the blockchain. In particular, as soon as a new block is mined it is immediately advertized to all the nodes in the network.
-\item \textbf{selfish miner}: makes and receives transactions and mines blocks of the \textit{private} blockchain. A selfish miner indeed holds both a copy of the public blockchain, which is the ``official'' blockchain, and a copy of the private blockchain, which is the blockchain created and maintained collectively by all the selfish miners. At any time the two blockchains may be equal or may differ for some block. If they differ, it is because the selfish miners have discovered new blocks which have been added to the private blockchain but have not been disclosed to the public. Indeed when a selfish miner mines a new block, it does not naively publish it and add to the public blockchain. Instead, it applies a strategy that allows it and the other selfish miners to get the maximum revenue from their computing power. One of the strategies that they can follow is explained in [2]. In this project, I chosed to implement it. The pseudocode is reported in algorithms \ref{sm_init}, \ref{sm_block} and \ref{sm_others}. \\
+\item \textbf{selfish miner}: makes and receives transactions and mines blocks of the \textit{private} blockchain. A selfish miner indeed holds both a copy of the public blockchain, which is the ``official'' blockchain, and a copy of the private blockchain, which is the blockchain created and maintained collectively by all the selfish miners. At any time the two blockchains may be equal or may differ for some block. If they differ, it is because the selfish miners have discovered new blocks which have been added to the private blockchain but have not been disclosed to the public yet. Indeed when a selfish miner mines a new block, it does not naively publish it and add to the public blockchain. Instead, it applies a strategy that allows it and the other selfish miners to get the maximum revenue from their computing power. One of the strategies that they can follow is explained in [2]. In this project, I chosed to implement it. The pseudocode is reported in algorithms \ref{sm_init}, \ref{sm_block} and \ref{sm_others}. \\
 \textbf{Initialization} Since we assume that all the nodes are present at the beginning of the simulation, at initialization (algorithm \ref{sm_init}) a selfish miner has both the private and public blockchain empty, and the \textit{privateBranchLength}, which tells how many blocks the two blockchains differ for, is set to zero. \\
 \textbf{Selfish Miner found a block} Algorithm \ref{sm_block} describes what happens when one selfish miner creates a new block: the block is added to the private blockchain and the \textit{privateBranchLength} is incremented accordingly. If there was a fork in the public blockchain (line 4), then the selfish miners are in competition with the honest miners to insert their own blocks in the final version of the blockchain. In this case the new block is advertized to all the nodes of the network. In so doing, the selfish miners are quite confident that their two blocks will be included in the blockchain, at the expense of the block mined by the honest miner. Figures \ref{fig:fork}, \ref{fig:fork_2b} and \ref{fig:fork_resolved} illustrate this situation. \\
 \textbf{Other miners found a block} Algorithm \ref{sm_others} describes the behaviour of the selfish miner when a (honest) miner creates a new block. If the private blockchain and the public one are equal (line 3), then the selfish miner is fallen behind the other miners and thus accepts the new block and continues mining on top of it. If the selfish miner was one block ahead (line 6), then it advertises to all the nodes its private block, leading to a fork in the blockchain. If the selfish miner was two blocks ahead (line 8), then it publishes both its blocks. This way, it is quite confident that these two blocks will become part of the blockchain, because the branch that it creates is longer than the branch created by the honest miner. If the selfish miner had an advantage of more than 2 blocks (line 11), then it publishes only the first unpublished private block, leading the honest miners to spend clock cycles to mine blocks that at the end won't be part of the final blockchain.
@@ -68,14 +69,14 @@ In the following subsections I explain the design choices that I made. This is a
 \begin{itemize}
 \item \textbf{transaction}: transactions are generated by nodes. They have an input node, an output node, an amount and a fee. For the sake of simplicity, I have assumed that each node pays the transaction at the moment of creation, and that for each transaction the fee is fixed in percentage.
 \item{\textbf{block}}: a block basically contains a list of transactions. For the sake of simplicity, I assumed that the reward for the block creation is immediately given to the miner. If such block is later removed from the blockchain, then also the reward given to the miner is given back. The block creation is arbitrary: it is not required to the miners to solve any Proof Of Work, instead it is the oracle that chooses at random the miner that has to create the new block of the blockchain. 
-\item{\textbf{blockchain}}: a blockchain is a list of blocks. It does not include hash pointers, so it is not tamper-free. A block is added to the blockchain if it has been created by a miner and if its parent matches the current last block of the blockchain.
+\item{\textbf{blockchain}}: a blockchain is a list of blocks. It does not include hash pointers, so it is not tamper-free. At any node, a block is added to the blockchain if it has been created by a miner and if its parent matches the current last block of the blockchain.
 \end{itemize}
 
 \subsection{Forks} 
 Forks have a serious impact on the selfish mining strategy. Indeed, selfish miners goal is basically to fork the blockchain, creating a branch that eventually becomes longer than the ``official'' one and thus gets included in the blockchain, to the detriment of the branch created by honest miners. There are two kinds of forks that are supported in this project:
 \begin{itemize}
 \item \textbf{selfish miner}: it supports forks of arbitrary length, that is the public and the private blockchain may differ for an arbitrary number of blocks from the point of view of the selfish miner. This fact is necessary in order to apply its strategy, as described in algorithms \ref{sm_init}, \ref{sm_block} and \ref{sm_others}.
-\item{\textbf{node}}: a normal node only supports a simplified kind of fork, that is one in which there are two branches made of only one block. The next block that is received by the node that extends one of the two branches actually resolves the fork. If at this point another blocks arrives willing to extend the abandoned branch, it will be simply discarded. There are two reasons for this assumption. The first is simplicity: at any time there are no orphan branches in the blockchain, but only a simple fork is admitted. The second is tamper resistance: since the blockchain is not tamper-free, avoiding to leave branches in the blockchain and allowing to fork only the last block of the blockchain means that fraudolent miners cannot mine on top of arbitrary branches instead of the ``official'' one.  
+\item{\textbf{node}}: a normal node only supports a simplified kind of fork, that is one in which there are two branches made of only one block. The next block that is received by the node that extends one of the two branches actually resolves the fork. If at this point another blocks arrives willing to extend the abandoned branch, it will be simply discarded. There are two reasons for this assumption. The first is simplicity: at any time there are no orphan branches in the blockchain, but only a simple fork is admitted. The second is tamper resistance: since the blockchain is not tamper-free, avoiding to leave branches in the blockchain and allowing to fork only the last block of the blockchain means that fraudolent miners cannot mine on top of arbitrary, orphan branches.  
 \end{itemize}
 
 \subsection{Network Latencies} 
@@ -144,7 +145,7 @@ Forks have a serious impact on the selfish mining strategy. Indeed, selfish mine
 
 
 \section{Implementation}  
-I set up the simulation using the event driven version of the Peersim simulator. The classes of this project are in some way dictated by the framework itself. For instance, I wished to have three different classes Node, Miner and SelfishMiner that extended the base class NetworkNode. Each network node would have been one among Node, Miner and SelfishMiner, so that it was immediately clear which was its role in the network. Anyway this was not possible because I had to follow the structure of classes defined by the framework. In this section, I describe the classes that I developed with reference to their role in the framework.
+I set up the simulation using the event driven version of the Peersim simulator. The classes of this project are in some way dictated by the framework itself. For instance, I wished to have three different classes Node, Miner and SelfishMiner that extended the base class NetworkNode. Each network node would have been one among Node, Miner and SelfishMiner, so that it was immediately clear which was its role in the network. Anyway this was not possible because I had to follow the structure of classes defined by the framework. In this section, I describe the classes that I developed in reference to their role in the framework.
 \subsection{Protocols}
 Every node in the network is a TinyCoinNode. If the node is a normal node, only the NodeProtocol is enabled; if it is a miner, both the NodeProtocol and the MinerProtocol are enabled; if it is a SelfishMiner, both the SelfishMinerProtocol and the NodeProtocol are enabled (figure \ref{fig:protocols}).
 \begin{figure}
@@ -153,9 +154,9 @@ Every node in the network is a TinyCoinNode. If the node is a normal node, only 
 \label{fig:protocols}
 \end{figure}
 \begin{itemize}
-\item \textbf{NodeProtocol} The NodeProtocol is responsible for creating and advertising transactions and for publishing blocks of the public blockchain. The method \textit{nextCycle()}, called at every cycle, creates a transaction with a fixed probability defined in the configuration file. Both the amount and the recipient of the transaction are random. Then the transaction is published on the network. The method \textit{processEvent()} is invoked every time the NodeProtocol receives a message. A message may be either a transaction or a block. In the former case, if the node hasn't already seen it, it adds the transaction to its transaction pool and floods it to its neighbors. In the latter case the behaviour is different based on the type of node. If the node is a normal node or a honest miner, it checks whether the received block has to be added to the blockchain, checks the eventual presence of forks, makes some other operation and finally floods the block to all its neighbors. Else, if the node is a selfish miner it implements the algorithm \ref{sm_others}. The fact that also the selfish miners run the NodeProtocol could seem weird, but actually there are two reasons for this choice. First: a selfish miner is also a node, able to make and receive transactions. Second: I use the NodeProtocol as a ``public layer'' to exchange public information among the nodes of the network, namely transactions and blocks of the public chain. Instead, I use the SelfishMinerProtocol as a ``private layer'' to exchange private information inside the selfish miners pool, namely the blocks of the private blockchain not disclosed to public yet. 
-\item \textbf{MinerProtocol} The MinerProtocol is run by the miners. At each cycle it is invoked the method \textit{nextCycle()}, which is actually executed only if the oracle selected this miner for the current cycle. If this is the case, the miner picks a set of transactions from its transaction pool and creates a new block. The block is immediately advertised to all its neighbors and the revenue for mining a new block is immediately assigned to the miner.  
-\item \textbf{SelfishMinerProtocol} The SelfishMinerProtocol is run by the selfish miners. At each cycle it is invoked the method \textit{nextCycle()}, which is actually executed only if the oracle selected this selfish miner for the current cycle. This method creates a new block using the transactions in the transaction pool and then implements the algorithm \ref{sm_block}, that is either shares the block with the selfish miners or with all the nodes based on convenience. The method \textit{processEvent()} is invoked every time a ``secret'' block is received from a selfish miner, so it simply implements the algorithm \ref{sm_block}.
+\item \textbf{NodeProtocol} The NodeProtocol is responsible for creating and advertising transactions and for publishing blocks of the public blockchain. The method \textit{nextCycle()}, called at every cycle, creates a transaction with a fixed probability defined in the configuration file. Both the amount and the recipient of the transaction are random. Then the transaction is published on the network. The method \textit{processEvent()} is invoked every time the NodeProtocol receives a message. A message may be either a transaction or a block. In the former case, if the node hasn't already seen it, it adds the transaction to its transaction pool and floods it to its neighbors. In the latter case the behaviour is different based on the type of node. If the node is a normal node or a honest miner, it checks whether the received block has to be added to the blockchain, checks the eventual presence of forks, makes some other operation and finally floods the block to all its neighbors. Else, if the node is a selfish miner it implements the algorithm \ref{sm_others}. The fact that also the selfish miners run the NodeProtocol could seem weird, but actually there are two reasons for this choice. First: a selfish miner is also a node, able to make and receive transactions. Second: I use the NodeProtocol as a ``public layer'' to exchange public information among the nodes of the network, namely transactions and blocks of the public blockchain. Instead, I use the SelfishMinerProtocol as a ``private layer'' to exchange private information inside the selfish miners pool, namely the blocks of the private blockchain not disclosed to public yet. 
+\item \textbf{MinerProtocol} The MinerProtocol is run by the miners. At each cycle the method \textit{nextCycle()} is invoked, which is actually executed only if the oracle selected this miner for the current cycle. If this is the case, the miner picks a set of transactions from its transaction pool and creates a new block. The block is immediately advertised to all its neighbors and the revenue for mining a new block is immediately assigned to the miner.  
+\item \textbf{SelfishMinerProtocol} The SelfishMinerProtocol is run by the selfish miners. At each cycle the method \textit{nextCycle()} is invoked, which is actually executed only if the oracle selected this selfish miner for the current cycle. This method creates a new block using the transactions in the transaction pool and then implements the algorithm \ref{sm_block}, that is either shares the block with the selfish miners or with all the nodes based on convenience. The method \textit{processEvent()} is invoked every time a ``secret'' block is received from a selfish miner, so it simply implements the algorithm \ref{sm_block}.
 \end{itemize}
 \subsection{Initializer}
 \begin{itemize}
@@ -163,7 +164,7 @@ Every node in the network is a TinyCoinNode. If the node is a normal node, only 
 \end{itemize}
 \subsection{Control}
 \begin{itemize}
-\item \textbf{TinyObserver} The TinyObserver monitors the simulation, logging on disk statistics that will be later plotted. These statistics include the number of forks occurred in the simulation, the number of blocks in the blockchain that have been mined by honest and fraudolent miners, and so on. 
+\item \textbf{TinyObserver} The TinyObserver monitors the simulation, logging on disk statistics that will be later plotted. These statistics include the number of forks occurred in the simulation, the number of blocks in the blockchain that have been mined by honest and fraudolent miners, the total number of blocks mined on varying the message latency and and the number of blocks mined per unit of hash rate by honest and selfish miners on varying the number of selfish miners in the network. 
 \item \textbf{Oracle} The method \textit{execute()} of the Oracle is invoked once per cycle. This method selects at random the miner that has created the new block. In some (rare) case, the oracle may decide that two miners have concurrently solved the Proof of Work, and so two different blocks will be mined such that they will result in a fork of the blockchain. This may happen in practice, so I decided to model this case. At each cycle, each miner has a probability of being selected that depends on its computing power: the more the power, the more the probability that such miner has solved the Proof of Work. During the first invocation, the oracle initializes the probabilities of selecting a miner of a given type, taking into account the hash rate of each miner type and the total hash rate of the network. The hash rate of each miner type is a parameter that is defined in the configuration file. The total hash rate of the network depends on the number of miners in the network and on their type. The random selection of a miner is done in two steps. In the first, it is randomly chosen the type of the miner. In the second, the nodes in the network are shuffled and then they are scanned in this new order, taking the first miner with appropriate type.
 \end{itemize}
 \subsection{Other Classes} 
@@ -177,11 +178,61 @@ In this paragraph I describe the classes of the project that don't belong to the
 \end{itemize}
 
 
-\section{Results}
+\section{Experimental Results}
+Let us define \textit{experiment} the single execution of the Peersim Simulator, for a given number of cycles, with the classes described above. An experiment logs statistics about its execution on files. These statistics depends on the value of the parameters defined in the (Peersim) configuration file. \\
+Let us define \textit{simulation} the repeated execution of the experiment. Namely, the parameters in the configuration file are assigned more values and for each value the experiment is carried out several times and the statistics produced are averaged and plotted. It is possible to run a simulation in a fully automatized way thanks to the use of scripts. These scripts, together with all the code of the project classes, are reported in the \href{https://github.com/Balzu/TinyCoin/blob/master/docs/implementation.pdf}{\textit{Implementation}} report. \\
+The value of the parameters used to run the simulation are specified in the configuration file. Each experiment has a maximum duration of 30 cycles. For each configuration of the parameters, the experiment has been repeated 10 times. Finally the collected statistics have been averaged and plotted. In the following paragraphs, I report and comment these statistics.
+
+\subsection{Blocks mined by honest and fraudolent miners in the blockchain} 
+Figures from \ref{fig:bk0.10} to \ref{fig:bk1.00} show how many blocks have been mined by honest miners and how many from selfish miners, on varying the probability that a miner is a selfish miner. This probability is a parameter in the configuration file that is passed to the NodesInitializer class, which decides whether a network node is a normal node, a miner or a selfish miner. The graphs show that the system behaves as expected: if the probability of having selfish miners is small, and thus the number of selfish miners is small (making several experiments and taking the average reduces the variance), the number of blocks mined by selfish miners is small, whereas the number of blocks mined by honest miners is big. If the number of selfish miners increase the two lines get closer (figure \ref{fig:bk0.30}) but when the number of selfish miners is more or less equal to the number of honest miners (figure \ref{fig:bk0.50}), the number of blocks mined by selfish miners is significantly higher than the number of blocks mined by honest miners. This is a demostration that in this system the selfish mining strategy is effective. If the number of selfish miners further increase, the honest miners are not able to mine any block that will end up in the blockchain.
+
+
+\begin{figure}[!htb]
+\minipage{0.46\textwidth}
+  \includegraphics[width=\linewidth]{plots/blockchain_P0.10.png}
+  \caption{Probability of selfish miner = 0.10}\label{fig:bk0.10}
+\endminipage\hfill
+\minipage{0.46\textwidth}
+  \includegraphics[width=\linewidth]{plots/blockchain_P0.30}
+  \caption{Probability of selfish miner = 0.30}\label{fig:bk0.30}
+\endminipage\hfill
+
+\end{figure}
+\begin{figure}[!htb]
+\minipage{0.46\textwidth}
+  \includegraphics[width=\linewidth]{plots/blockchain_P0.50.png}
+  \caption{Probability of selfish miner = 0.50}\label{fig:bk0.50}
+\endminipage\hfill
+\minipage{0.46\textwidth}
+  \includegraphics[width=\linewidth]{plots/blockchain_P0.70}
+  \caption{Probability of selfish miner = 0.70}\label{fig:bk0.70}
+\endminipage\hfill
+\end{figure}
+\begin{figure}[!htb]
+\minipage{0.46\textwidth}
+  \includegraphics[width=\linewidth]{plots/blockchain_P0.90.png}
+  \caption{Probability of selfish miner = 0.90}\label{fig:bk0.90}
+\endminipage\hfill
+\minipage{0.46\textwidth}
+  \includegraphics[width=\linewidth]{plots/blockchain_P1.00}
+  \caption{Probability of selfish miner = 1.00}\label{fig:bk1.00}
+\endminipage\hfill
+\end{figure}
+
+\subsection{Forks in the blockchain}
+Figure \ref{fig:forks} shows the number of forks in the blockchain on varying the probability that a miner is a selfish miner. Several lines are plotted on the same graph, each one characterized by a different value of probability. The maximum number of forks is when the probability is 0.50, and this is probably due to the fact that in this case the struggle between honest miners and selfish miners to put their blocks in the blockchain is maximum because their hash rate is balanced. Instead, when the number of selfish miners is much bigger than the number of honest miners the number of forks is small, because on average honest miners take a lot of time to mine a block. The same conclusion holds for the opposite situation.
+\begin{figure}
+\centerline{\includegraphics[scale=0.50]{plots/forks}}
+\caption{Forks in the blockchain on varying the probability that a miner is a selfish miner}
+\label{fig:forks}
+\end{figure}
+
+\subsection{Mined blocks per computational power}
+Each type of miner (CPU, GPU, FPGA or ASIC)is assigned a different hash rate, defined as the number of hash functions computed per second. For each value of probability (of being a selfish miner), I have computed the total hash rate of both honest miners and selfish miners. Then, I computed how many blocks in the blockchain were mined by selfish miners and how many by honest miners and finally I have computed the ratio Mined Blocks / Hash Rate, where the hash rate is in billion hashes per second.
+\subsection{} 
 
 
 
-alala
 
 
 \section{Conclusion}
@@ -193,6 +244,7 @@ alala
 
 \begin{itemize}
 \item \textbf{forks}
+\item \textbf{proabilities in the experiment and not clear number of nodes}
 \end{itemize}
 
 \section{References} 
