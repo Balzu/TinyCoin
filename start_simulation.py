@@ -78,3 +78,6 @@ for count in repetitions:
 
 for p in prob_sminer:
     os.system('python build_avg_statistics.py ' + p)
+    
+for d in delay:
+    os.system('python build_avg_statistics.py d' + d)

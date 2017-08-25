@@ -1,4 +1,4 @@
-reset
+#reset
 
 # define axis
 # remove border on top and right and set color to gray
@@ -20,8 +20,13 @@ set key left top
 set terminal pngcairo size 500,500 enhanced font 'Verdana,9'
 
 ## To be set from script
-set xlabel 'x axis label'
-set ylabel 'y axis label'
-set output 'blockchain.png'
-plot '../statistics/blockchain_avg.dat' u 1:2 t 'Honest blocks' w lp ls 1, \
-     ''                  u 1:3 t 'Fraudolent blocks' w lp ls 2
+#set xlabel 'x axis label'
+#set ylabel 'y axis label'
+#set output 'blockchain.png'
+#plot '../statistics/blockchain_avg.dat' u 1:2 t 'Honest blocks' w lp ls 1, \
+#     ''                  u 1:3 t 'Fraudolent blocks' w lp ls 2
+set xlabel 'Cycles ' 
+set ylabel'Mined Blocks ' 
+set output 'blockchain_P0.70.png' 
+plot docs/statistics/avg/blockchain_P0.70_avg.dat u 1:2 t 'Honest blocks' w lp ls 1, \ 
+                   u 1:3 t 'Fraudolent blocks' w lp ls 2
