@@ -179,12 +179,12 @@ In this paragraph I describe the classes of the project that don't belong to the
 
 
 \section{Experimental Results}
-Let us define \textit{experiment} the single execution of the Peersim Simulator, for a given number of cycles, with the classes described above. An experiment logs statistics about its execution on files. These statistics depends on the value of the parameters defined in the (Peersim) configuration file. \\
+Let us define \textit{experiment} the single execution of the Peersim Simulator, for a given number of cycles, with the classes described above. An experiment logs statistics about its execution on files. These statistics depend on the values of the parameters defined in the (Peersim) configuration file. \\
 Let us define \textit{simulation} the repeated execution of the experiment. Namely, the parameters in the configuration file are assigned more values and for each value the experiment is carried out several times and the statistics produced are averaged and plotted. It is possible to run a simulation in a fully automatized way thanks to the use of scripts. These scripts, together with all the code of the project classes, are reported in the \href{https://github.com/Balzu/TinyCoin/blob/master/docs/implementation.pdf}{\textit{Implementation}} report. \\
 The value of the parameters used to run the simulation are specified in the configuration file. Each experiment has a maximum duration of 30 cycles. For each configuration of the parameters, the experiment has been repeated 10 times. Finally the collected statistics have been averaged and plotted. In the following paragraphs, I report and comment these statistics.
 
 \subsection{Blocks mined by honest and fraudolent miners in the blockchain} 
-Figures from \ref{fig:bk0.10} to \ref{fig:bk1.00} show how many blocks have been mined by honest miners and how many from selfish miners, on varying the probability that a miner is a selfish miner. This probability is a parameter in the configuration file that is passed to the NodesInitializer class, which decides whether a network node is a normal node, a miner or a selfish miner. The graphs show that the system behaves as expected: if the probability of having selfish miners is small, and thus the number of selfish miners is small (making several experiments and taking the average reduces the variance), the number of blocks mined by selfish miners is small, whereas the number of blocks mined by honest miners is big. If the number of selfish miners increase the two lines get closer (figure \ref{fig:bk0.30}) but when the number of selfish miners is more or less equal to the number of honest miners (figure \ref{fig:bk0.50}), the number of blocks mined by selfish miners is significantly higher than the number of blocks mined by honest miners. This is a demostration that in this system the selfish mining strategy is effective. If the number of selfish miners further increase, the honest miners are not able to mine any block that will end up in the blockchain.
+Figures from \ref{fig:bk0.10} to \ref{fig:bk1.00} show how many blocks have been mined by honest miners and how many from selfish miners, on varying the probability that a miner is a selfish miner. This probability is a parameter in the configuration file that is passed to the NodesInitializer class, which decides whether a network node is a normal node, a miner or a selfish miner. The graphs show that the system behaves as expected: if the probability of having selfish miners is small, and thus the number of selfish miners is small (making several experiments and taking the average reduces the variance of the number of selfish miners), the number of blocks mined by selfish miners is small, whereas the number of blocks mined by honest miners is big. If the number of selfish miners increase the two lines get closer (figure \ref{fig:bk0.30}) but when the number of selfish miners is more or less equal to the number of honest miners (figure \ref{fig:bk0.50}), the number of blocks mined by selfish miners is significantly higher than the number of blocks mined by honest miners. This is a demostration that in this system the selfish mining strategy is effective. If the number of selfish miners further increase, the honest miners are not able to mine any block that will end up in the blockchain.
 
 
 \begin{figure}[!htb]
@@ -220,7 +220,7 @@ Figures from \ref{fig:bk0.10} to \ref{fig:bk1.00} show how many blocks have been
 \end{figure}
 
 \subsection{Forks in the blockchain}
-Figure \ref{fig:forks} shows the number of forks in the blockchain on varying the probability that a miner is a selfish miner. Several lines are plotted on the same graph, each one characterized by a different value of probability. The maximum number of forks is when the probability is 0.50, and this is probably due to the fact that in this case the struggle between honest miners and selfish miners to put their blocks in the blockchain is maximum because their hash rate is balanced. Instead, when the number of selfish miners is much bigger than the number of honest miners the number of forks is small, because on average honest miners take a lot of time to mine a block. The same conclusion holds for the opposite situation.
+Figure \ref{fig:forks} shows the number of forks in the blockchain on varying the probability that a miner is a selfish miner. Several lines are plotted on the same graph, each one parametrized with a different value of probability. The maximum number of forks is when the probability is 0.50, and this is probably due to the fact that in this case the struggle between honest miners and selfish miners to put their blocks in the blockchain is maximum because their hash rate is balanced. Instead, when the number of selfish miners is much bigger than the number of honest miners the number of forks is small, because on average honest miners take a lot of time to mine a block. The same conclusion holds when the number of honest miners is much bigger than the number of selfish miners.
 \begin{figure}
 \centerline{\includegraphics[scale=0.50]{plots/forks}}
 \caption{Forks in the blockchain on varying the probability that a miner is a selfish miner}
@@ -228,20 +228,33 @@ Figure \ref{fig:forks} shows the number of forks in the blockchain on varying th
 \end{figure}
 
 \subsection{Mined blocks per computational power}
-Each type of miner (CPU, GPU, FPGA or ASIC)is assigned a different hash rate, defined as the number of hash functions computed per second. For each value of probability (of being a selfish miner), I have computed the total hash rate of both honest miners and selfish miners. Then, I computed how many blocks in the blockchain were mined by selfish miners and how many by honest miners and finally I have computed the ratio Mined Blocks / Hash Rate, where the hash rate is in billion hashes per second.
-\subsection{} 
+Each type of miner (CPU, GPU, FPGA or ASIC) is assigned a different hash rate, defined as the number of hash functions computed per second. For each value of probability (of being a selfish miner), I have computed the total hash rate of both honest miners and selfish miners. Then, I computed how many blocks in the blockchain were mined by selfish miners and how many by honest miners and finally I have computed the ratio Mined Blocks / Hash Rate, where the hash rate is in billion hashes per second. The results are plotted in figure \ref{fig:bphr}: the effectiveness of the hash rate of both honest and selfish miners is not constant, but varies with the number of selfish miners in the network. If they are few (probability = 0.10), then the majority of blocks are mined by honest miners and so their ratio mined blocks / hash rate is high, while the same ratio for the selfish miners is close to zero because even if selfish miners have a low hash rate, they actually mine very few blocks. The selfish miners start mining more blocks per hash rate than the honest miners for a value of probability between 0.30 and 0.50. This fact is another proof of the effectiveness of the selfish mining strategy. If the value of probability increases, the ratio increases for the selfish miners while it decreases for the honest miners. Another thing to note is that the value of such ratio is maximum for the selfish miners, meaning that the adoption of selfish mining strategy leads to a better exploitation of the computational power.
+
+\begin{figure}
+\centerline{\includegraphics[scale=0.50]{plots/blocks_per_hashrate}}
+\caption{Effectiveness of the hash rate of honest and selfish miners on varying the probability that a miner is a selfish miner}
+\label{fig:bphr}
+\end{figure}
 
 
+\subsection{Number of blocks in the blockchain for different latencies of messages}
+Figure \ref{fig:bwd} shows the number of blocks in the blockchain on varying the latency of messages. The base duration of each message exchange is defined with respect to the line with delay 0. This means that the line parametrized with a delay equal to 0.50 is characterized by a latency for each message which is 50\% greater than the base case. This way we are for instance able to model congestion in the network. The results are quite straightforward: the blockchain is longer when the latency of each message exchange is smaller and shorter when the latency is bigger. In this simulation I don't have considered the case in which some message is lost, although I think the protocol should be reliable to message losses because of the flooding of blocks and transactions.
+
+\begin{figure}
+\centerline{\includegraphics[scale=0.50]{plots/blocks_with_delay}}
+\caption{Number of blocks in the blockchain on varying the latency of messages. A delay = \textit{0.X} means that all the messages are delayed of \textit{X\%} with respect to the simulation with zero delay. }
+\label{fig:bwd}
+\end{figure}
 
 
-
-\section{Conclusion}
-
-
+\section{Conclusions}
+In this project I have implemented a simplified version of the Bitcoin network to evaluate the effects of the selfish mining strategy, a fraudolent mining strategy that should guarantee to the miners that adopt it a revenue, in terms of mined blocks, bigger than the one that they would expect if they had adopted the classical mining strategy. \\ \\
+I have defined \textit{experiment} the single run of the program and \textit{simulation} the repeated execution of an experiment with the same parameters. In this document I have reported the statistics obtained by running several simulations, each one with a different set of parameters. \\ \\
+The experimental results obtained in this setting suggest that the adoption of selfish mining strategy is effective in practice, and its effectiveness becomes clear when the number of selfish miners in the network is at least the 30\% out of the total number of miners. Increasing the latency of message exchange results in a diminuition of the number of blocks in the blockchain.
 
 
 \section{Limitations} 
-
+There are 
 \begin{itemize}
 \item \textbf{forks}
 \item \textbf{proabilities in the experiment and not clear number of nodes}

@@ -13,7 +13,7 @@
 \contentsline {subsection}{\numberline {4.1}Blocks mined by honest and fraudolent miners in the blockchain}{7}{subsection.4.1}
 \contentsline {subsection}{\numberline {4.2}Forks in the blockchain}{7}{subsection.4.2}
 \contentsline {subsection}{\numberline {4.3}Mined blocks per computational power}{8}{subsection.4.3}
-\contentsline {subsection}{\numberline {4.4}}{9}{subsection.4.4}
+\contentsline {subsection}{\numberline {4.4}Number of blocks in the blockchain for different latencies of messages}{9}{subsection.4.4}
 \contentsline {section}{\numberline {5}Conclusion}{9}{section.5}
-\contentsline {section}{\numberline {6}Limitations}{9}{section.6}
-\contentsline {section}{\numberline {7}References}{9}{section.7}
+\contentsline {section}{\numberline {6}Limitations}{11}{section.6}
+\contentsline {section}{\numberline {7}References}{11}{section.7}
