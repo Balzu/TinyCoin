@@ -8,14 +8,24 @@ The *src* folder contains the source of the project, the *lib* folder the librar
 ### Running an experiment
 Running an experiment means running a single run of the Peersim Simulator with the configuration parameters defined in *tinycoin_config.txt*. To run an experiment you simply open the terminal and type 
 
-> java -jar bin/tinycoin.jar peersim.mulator tinycoin_config.txt
+
+`java -jar bin/tinycoin.jar peersim.Simulator tinycoin_config.txt `
 
 ### Running a simulation
 A simulation consists in choosing a set of values for the parameters and, for each combination of such values, in runnning the experiment for a given number of times. At the end the experiment will be carried out several times with different parameters values and the results of the repeated execution of the same experiment will be averaged and plotted. 
 It is possible to set up a simulation thanks to the use of scripts: 
 
-* start_simulation.py
-* build_avg_statistics.py
-* plot_avg_statistics.py
+
+* `start_simulation.py`: it's the script that actually starts the simulation. The set of parameters for the simulation are defined in this file. The values provided for these parameters will be substituted in the `tinycoin_config_for_script.txt` file and a temporary file will be created to run the experiments.
+* `build_avg_statistics.py`: this script, called by `start_simulation.py`, collects the statistics produced by the executions of the experiments, makes the proper averages and writes in the `docs/statistics/avg` subfolder these files ready to be plotted
+* `plot_avg_statistics.py`: this script, called by `start_simulation.py`, reads the files in the `docs/statistics/avg` subfolder and uses Gnuplot to create the graphs that will be stored in the `docs/plots` subfolder.
+
+In order to run a simulation, after having set up the values for the parameters in `start_simulation.py`, you simply need to open terminal and type
+
+
+`python start_simulation.py [repetitions]>`
+
+The `repetitions` arguments specifies how many times each experiment has to be repeated. If omitted, it defaults to zero.
+
 
 
