@@ -60,7 +60,7 @@ for count in repetitions:
         # Write the file out again
         with open('tinycoin_config_overwritten.txt', 'w+') as file:
             file.write(config_overwrite2)
-        os.system('java -cp lib/jep-2.3.0.jar:lib/djep-1.0.0.jar:lib/peersim-1.0.5.jar:lib/tinycoin.jar peersim.Simulator tinycoin_config_overwritten.txt ')
+        os.system('java -jar bin/tinycoin.jar peersim.Simulator tinycoin_config_overwritten.txt ')
    
     # Run the simulation also with different values of delay        
     for d in delay:    
@@ -69,7 +69,7 @@ for count in repetitions:
         config_overwrite = config_overwrite.replace('DELAY', d)        
         with open('tinycoin_config_overwritten.txt', 'w+') as file:
             file.write(config_overwrite)
-        os.system('java -cp lib/jep-2.3.0.jar:lib/djep-1.0.0.jar:lib/peersim-1.0.5.jar:lib/tinycoin.jar peersim.Simulator tinycoin_config_overwritten.txt ')
+        os.system('java -jar bin/tinycoin.jar peersim.Simulator tinycoin_config_overwritten.txt ')
         
         
 # Make the averages of the various statistics
