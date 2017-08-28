@@ -17,7 +17,7 @@ public class TinyCoinNode extends GeneralNode{
         
         
     public TinyCoinNode(String prefix) {
-    	super(prefix);
+    	super(prefix); 
     	transPool = new HashMap<>();
     	blockchain = new ArrayList<>();
     }

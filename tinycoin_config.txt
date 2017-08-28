@@ -11,11 +11,11 @@ MAXDELAY 100
 DROP 0
 
 # other parameters
-MAX_TRANS_PER_BLOCK 50
+MAX_TRANS_PER_BLOCK 30
 REWARD 10
 TRANS_PROB 0.15
-ROB_MINER 0.20
-ROB_SMINER 0.50
+PROB_MINER 0.20
+PROB_SMINER 0.50
 PROB_CPU 0.10
 PROB_GPU 0.30
 PROB_FPGA 0.30
@@ -23,7 +23,7 @@ PROB_ASIC 0.30
 PROB_2MINERS 0.05
 REPETITION 1
 PROB_SMINER 0.3
-ONLYLATENCY true
+ONLYLATENCY false
 DELAY 10
 
 random.seed 1234567890
@@ -110,5 +110,5 @@ control.observer.hr_cpu 50
 control.observer.hr_gpu 1000
 control.observer.hr_fpga 800
 control.observer.hr_asic 1000000
-control.observer.only_latency true
+control.observer.only_latency ONLYLATENCY
 control.observer.delay DELAY

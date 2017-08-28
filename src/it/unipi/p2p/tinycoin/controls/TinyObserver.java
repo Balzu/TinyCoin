@@ -82,7 +82,7 @@ public class TinyObserver implements Control{
 				}				
 				if (onlyLatency == true)
 				{
-					latencyStats = new FileWriter("docs/statistics/latencyR" + repetition + 
+					latencyStats = new FileWriter("docs/statistics/latency_R" + repetition + 
 							"_D" + delay + ".dat", false);
 					bw = new BufferedWriter(latencyStats);
 					bw.write("# Mined_Blocks" + " "  + "Cycle \n");				
