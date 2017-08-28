@@ -50,18 +50,18 @@ public class Oracle implements Control {
 		{
 			boolean initSuccess = initializeProb();
 			if (!initSuccess)
-				return true; // execute returns true if simulation has to be stopped
+				return true; 
 		}
 		
 		MinerType m1, m2;
 		m1 = getMinerType();       // Always choose one miner
 		TinyCoinNode mn1 = (TinyCoinNode)chooseMinerNode(m1);
-		if (mn1.isMiner())   //TODO: NullPointerException if in config file p_self_miner=0
+		if (mn1.isMiner())  
 			((MinerProtocol)mn1.getProtocol(minerPid)).setSelected(true);	
 		else //selfish miner
 			((SelfishMinerProtocol)mn1.getProtocol(selfMinerPid)).setSelected(true);
 		double rd = r.nextDouble();
-		if (rd < p2) {              // two miners solved PoW 'concurrently'
+		if (rd < p2) {              // two miners solved PoW concurrently
 			m2 = getMinerType();
 			TinyCoinNode mn2 = (TinyCoinNode)chooseMinerNode(m2);
 			if (mn2.isMiner())

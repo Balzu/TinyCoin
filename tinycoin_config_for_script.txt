@@ -1,28 +1,3 @@
-# network size
-#SIZE 1000
-
-# parameters of periodic execution
-#CYCLES 50
-#CYCLE_LENGTH 1000
-
-# parameters of message transfer
-#MINDELAY 0
-#MAXDELAY 100
-#DROP 0
-
-# other parameters
-#MAX_TRANS_PER_BLOCK 50
-#REWARD 10
-#TRANS_PROB 0.15
-#PROB_MINER 0.20
-#PROB_SMINER 0.50
-# PROB_CPU 0.10
-# PROB_GPU 0.30
-# PROB_FPGA 0.30
-# PROB_ASIC 0.30
-# PROB_2MINERS 0.05
-# REPETITION 1
-
 random.seed 1234567890
 network.size SIZE
 network.node TinyCoinNode
@@ -94,7 +69,6 @@ control.oracle.hr_fpga 800
 control.oracle.hr_asic 1000000
 control.oracle.miner_protocol miner
 control.oracle.self_miner_protocol self_miner
-# The oracle will be called once every CICLE_LENGTH time points. In the project specification, it should follow a distribution? But how to implement?
 control.oracle.step CYCLE_LENGTH	
 
 control.observer it.unipi.p2p.tinycoin.controls.TinyObserver

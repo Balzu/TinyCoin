@@ -19,7 +19,7 @@ public class NodesInitializer implements Control
 	private static final String PAR_PASIC = "pasic";
 	private static final String PAR_MAX_BALANCE = "max_balance";
 	
-	// Probability that a netwOrk node is a miner. A node can be either a miner or a TinyCoin normal node
+	// Probability that a network node is a miner.
 	private double pminer;
 	private double psminer;
 	
@@ -40,11 +40,9 @@ public class NodesInitializer implements Control
 		pfpga = Configuration.getDouble(prefix + "." + PAR_PFPGA);
 		pasic = Configuration.getDouble(prefix + "." + PAR_PASIC);
 		maxBalance = Configuration.getDouble(prefix + "." + PAR_MAX_BALANCE);
-		//TODO: prendi pid dei 2 protocolli dal file di config
 	}
 	
 	/** Initializes the nodes in the network based on the probability values received from Configuration file.
-	 *  
 	 */
 	@Override
 	public boolean execute()
@@ -60,18 +58,13 @@ public class NodesInitializer implements Control
 			n = (TinyCoinNode)Network.get(i);
 			double b = Math.random()*maxBalance;
 			n.setBalance(b);
-			//TODO vanno implementati 2 protocolli diversi per Miner e nodo normale. Se un nodo è solo un 
-			// nodo normale, allora eseguirà solo il protocollo del nodo; 
-			// se è anche un miner, allora eseguirà pure il protocollo del miner
 			double drandom = r.nextDouble();
 			if (drandom < pminer) { // the node is a miner
-				drandom = r.nextDouble();
-				
+				drandom = r.nextDouble();				
 				if (drandom < psminer) //Node is a selfish miner
 					n.setNodetype(NodeType.SELFISH_MINER);
 				else
-					n.setNodetype(NodeType.MINER);
-				
+					n.setNodetype(NodeType.MINER);				
 				drandom = r.nextDouble();
 				if (drandom < pcpu)
 					n.setMtype(MinerType.CPU);

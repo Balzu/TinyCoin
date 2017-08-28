@@ -27,19 +27,6 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 	private Block forked;
 	private int numForks;
 	
-
-	public int getNumForks() {
-		return numForks;
-	}
-
-	public void setSmpid(int smpid) {
-		this.smpid = smpid;
-	}
-
-	public void setNumTrans(int numTrans) {
-		this.numTrans = numTrans;
-	}
-
 	public NodeProtocol(String prefix) 
 	{
 		transProb = Configuration.getDouble(prefix + "." + PAR_P_TRANS);
@@ -48,16 +35,8 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 		fork = false;
 		forked = null;
 		numForks = 0;
-	}
+	}	
 	
-	public void setFork(boolean fork) {
-		this.fork = fork;
-	}
-
-	public void setForked(Block forked) {
-		this.forked = forked;
-	}
-
 	@Override
 	public Object clone() {
 		NodeProtocol np = null;
@@ -71,9 +50,30 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 			np.setNumForks(0);
 		}
 		catch(CloneNotSupportedException  e) {
-			
+			System.err.println(e);
 		}
 		return np;
+	}
+	
+
+	public int getNumForks() {
+		return numForks;
+	}
+
+	public void setSmpid(int smpid) {
+		this.smpid = smpid;
+	}
+
+	public void setNumTrans(int numTrans) {
+		this.numTrans = numTrans;
+	}
+
+	public void setFork(boolean fork) {
+		this.fork = fork;
+	}
+	
+	public void setForked(Block forked) {
+		this.forked = forked;
 	}
 	
 
@@ -82,55 +82,45 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 	{
 		TinyCoinNode tnode = (TinyCoinNode) node;
 		double balance = tnode.getBalance();
-		// Completely arbitrary, I assume that if a node has less than 1 coin cannot make a transaction
-		// (Substitutes the test for empty balance, and allow to avoid very small, fractional transactions)
+		//  I assume that if a node has less than 1 coin cannot make a transaction
+		// (Substitutes the test for empty balance, and allows to avoid very small, fractional transactions)
 		if (balance < 1) {  
 			return;
 		}
 		double r = Math.random();
 		// At each cycle, each node generates a transaction with a given probability
-		if (r < transProb) { 
-			
+		if (r < transProb) { 			
 			String tid = node.getID() + "@" + numTrans;
-			numTrans++;
-			
+			numTrans++;			
 			// Randomly choose one recipient
 			Network.shuffle();
-			TinyCoinNode recipient = (TinyCoinNode) Network.get(0);
-			
+			TinyCoinNode recipient = (TinyCoinNode) Network.get(0);			
 			double totalSpent = Math.random() * balance;
 			double amount = totalSpent * (9.0/10.0);
-			double fee = totalSpent - amount;
-			
+			double fee = totalSpent - amount;			
 			Transaction t = new Transaction(tid, tnode, recipient, amount, fee);
 			System.out.println(t.toString());
 			// Transaction has been created, so update balance and insert into local pool of unconfirmed transactions
 			tnode.getTransPool().put(tid, t);
-			balance -= totalSpent;
-			
+			balance -= totalSpent;			
 			// Send the transaction to all neighbor nodes
 			sendTransactionToNeighbors(node, pid, t);			
 		}		
-	}
+	}	
 	
-	// TODO: @Runtime, differentiate whether Object is Transaction or Block 
 	@Override
 	public void processEvent(Node node, int pid, Object event)
 	{
-		if (event instanceof Transaction) {
-			
+		if (event instanceof Transaction) {			
 			Transaction t = (Transaction) event;
 			Map<String, Transaction> transPool = ((TinyCoinNode) node).getTransPool();
-			// If never received the transaction, broadcast it to the neighbors
 			String tid = t.getTid();
+			// If never received the transaction, broadcast it to the neighbors
 			if (!transPool.containsKey(tid)) {
-				//System.out.println("Node " + node.getID() + " received transaction " + tid);
 				transPool.put(tid, t);
 				sendTransactionToNeighbors(node, pid, t);
 			}
-		}
-			
-		
+		}		
 		else if (event instanceof Block) {
 			TinyCoinNode tnode = (TinyCoinNode)node;	
 			List<Block> blockchain = tnode.getBlockchain();
@@ -152,7 +142,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 						if (onlyAddTheBlock(privateBlockchain, blockchain))
 							privateBlockchain.add(b);             //simply add one block
 						else 
-							smp.copyPublicBlockchain(tnode);      // delete last block of private blockchain to make the two exactly equal
+							smp.copyPublicBlockchain(tnode);      // also delete last block of private blockchain to make the two exactly equal
 						smp.setPrivateBranchLength(0);
 						sendBlockToNeighbors(node, pid, b);									
 						break;
@@ -165,13 +155,12 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 							sb = privateBlockchain.get(privateBlockchain.size() - i);
 							sendBlockToNeighbors(node, pid, sb); 
 						}
-						smp.copyPrivateBlockchain(tnode); //TODO: it is node's assumption, but is it ok?					
+						smp.copyPrivateBlockchain(tnode); 				
 						smp.setPrivateBranchLength(0);						
 						break;
 					default:
 						sb = privateBlockchain.get(privateBlockchain.size() - privateBranchLength);
 						sendBlockToNeighbors(node, pid, sb); 
-						//blockchain.add(sb);
 						smp.setPrivateBranchLength(privateBranchLength - 1);
 						break;
 					}
@@ -191,7 +180,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 								tnode.decreaseBalance(lastb.getRevenueForBlock());
 							blockchain.add(forked);
 							// No need to add the revenue for mining the block, because a honest miner always
-							// publishes ad takes the revenue as soon as it mines the block
+							// takes the revenue as soon as it mines the block
 							tnode.increaseBalance(forked.getTransactionsAmountIfRecipient(tnode));
 						}
 						fork = false;  // Fork is resolved, regardless of which is the extended branch
@@ -211,7 +200,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 					fork = true;
 					forked = b;
 					numForks++;
-					sendBlockToNeighbors(node, pid, b);	//TODO: added line, must check
+					sendBlockToNeighbors(node, pid, b);	
 				}				
 			}			
 		}		
@@ -237,7 +226,6 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 	 * @param t The transaction to be sent
 	 */
 	 public void sendTransactionToNeighbors(Node sender, int pid, Transaction t) {
-		// Send the transaction to all neighbor nodes
 		int linkableID = FastConfig.getLinkable(pid);
 		Linkable linkable = (Linkable) sender.getProtocol(linkableID);
 			for (int i =0; i<linkable.degree(); i++) {

@@ -14,6 +14,22 @@ public class TinyCoinNode extends GeneralNode{
 	private double balance;
 	private List<Block> blockchain; 
         private Map<String, Transaction> transPool;
+        
+        
+    public TinyCoinNode(String prefix) {
+    	super(prefix);
+    	transPool = new HashMap<>();
+    	blockchain = new ArrayList<>();
+    }
+        
+    @Override
+    public Object clone()
+    {
+    	TinyCoinNode clone = (TinyCoinNode)super.clone();
+    	clone.setTransPool(new HashMap<>());
+    	clone.setBlockchain(new ArrayList<>());
+    	return clone;
+    }
 	
 
 	public void setTransPool(Map<String, Transaction> transPool) {
@@ -39,14 +55,7 @@ public class TinyCoinNode extends GeneralNode{
 	
 	public boolean isSelfishMiner() {
 		return nodeType==NodeType.SELFISH_MINER;
-	}
-	
-
-	public TinyCoinNode(String prefix) {
-		super(prefix);
-		transPool = new HashMap<>();
-		blockchain = new ArrayList<>();
-	}
+	}	
 	
 	
 	public List<Block> getBlockchain() {
@@ -73,19 +82,7 @@ public class TinyCoinNode extends GeneralNode{
 	
 	public void decreaseBalance(double amount) {
 		balance -= amount;
-	}
-
-	@Override
-	public Object clone()
-	{
-		TinyCoinNode clone = (TinyCoinNode)super.clone();
-		//TODO: devo lasciarli i 2 metodi sotto o non servono?
-		//clone.setNodetype(nodeType);
-		//clone.setMtype(this.getMtype());
-		clone.setTransPool(new HashMap<>());
-		clone.setBlockchain(new ArrayList<>());
-		return clone;
-	}
+	}	
 
 
 	public void setNodetype(NodeType ntype) {

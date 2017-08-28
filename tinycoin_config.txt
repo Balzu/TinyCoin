@@ -13,6 +13,15 @@ DROP 0
 # other parameters
 MAX_TRANS_PER_BLOCK 50
 REWARD 10
+TRANS_PROB 0.15
+ROB_MINER 0.20
+ROB_SMINER 0.50
+PROB_CPU 0.10
+PROB_GPU 0.30
+PROB_FPGA 0.30
+PROB_ASIC 0.30
+PROB_2MINERS 0.05
+REPETITION 1
 PROB_SMINER 0.3
 ONLYLATENCY true
 DELAY 10
@@ -29,7 +38,7 @@ protocol.node it.unipi.p2p.tinycoin.protocols.NodeProtocol
 protocol.node.linkable link
 protocol.node.step CYCLE_LENGTH
 protocol.node.transport tr
-protocol.node.transaction_prob 0.15
+protocol.node.transaction_prob TRANS_PROB
 protocol.node.self_miner_prot self_miner
 
 protocol.urt UniformRandomTransport
@@ -60,12 +69,12 @@ init.0.protocol link
 init.0.k 20
 
 init.1 it.unipi.p2p.tinycoin.initializer.NodesInitializer
-init.1.pminer 0.20                                        #tweak this!!
+init.1.pminer PROB_MINER                                        
 init.1.p_self_miner PROB_SMINER 
-init.1.pcpu 0.10
-init.1.pgpu 0.30
-init.1.pfpga 0.30
-init.1.pasic 0.30
+init.1.pcpu PROB_CPU
+init.1.pgpu PROB_GPU
+init.1.pfpga PROB_FPGA
+init.1.pasic PROB_ASIC
 init.1.max_balance 1000
 
 init.2 CDScheduler
@@ -81,14 +90,13 @@ init.4.protocol self_miner
 init.3.randstart
 
 control.oracle it.unipi.p2p.tinycoin.controls.Oracle
-control.oracle.prob_2_miners 0.10   
+control.oracle.prob_2_miners PROB_2MINERS   
 control.oracle.hr_cpu 50
 control.oracle.hr_gpu 1000
 control.oracle.hr_fpga 800
 control.oracle.hr_asic 1000000
 control.oracle.miner_protocol miner
 control.oracle.self_miner_protocol self_miner
-# The oracle will be called once every CICLE_LENGTH time points. In the project specification, it should follow a distribution? But how to implement?
 control.oracle.step CYCLE_LENGTH	
 
 control.observer it.unipi.p2p.tinycoin.controls.TinyObserver

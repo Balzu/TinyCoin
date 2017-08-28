@@ -14,7 +14,7 @@ public class Transaction {
 		this.input = input;
 		this.output = output;
 		this.amount = amount;
-		this.fee = fee; //TODO: set as parameter the fee per transaction
+		this.fee = fee;
 	}
 	
 	public double getAmount() {

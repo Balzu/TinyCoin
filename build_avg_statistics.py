@@ -19,7 +19,7 @@ if sys.argv[1].startswith("d"):  # Building latency statistics
                     if line.startswith("#"):
                         blocks.append(None)   
                     else:     
-                        a = line.split('            ')   #exactly 12 spaces
+                        a = line.split('            ')   # exactly 12 spaces
                         blocks.append(int(a[0]))     
                 else:
                     if line.startswith("#"):                            
@@ -39,8 +39,7 @@ if sys.argv[1].startswith("d"):  # Building latency statistics
                     outs = outs + str(count) + '     ' + str(blocks[count]) + '\n'
                 out_file.write(outs) 
                 
-else:                         # Building all other statistics
-    print 'NOOOOOOOOOOOOOOO'
+else:                         # Building all other statistics    
     p = sys.argv[1]
     pattern = 'P'+p[:-1]
 
@@ -54,18 +53,18 @@ else:                         # Building all other statistics
             print filename
             cycle = 0
             for line in in_file:                    
-                if files_scanned == 0:  # the first time we have to populate the arrays
+                if files_scanned == 0:  
                     if line.startswith("#"):
                         honest_blocks.append(None)
                         fraudolent_blocks.append(None)
                     else:
-                        a = line.split('            ')   #exactly 12 spaces
+                        a = line.split('            ')   
                         honest_blocks.append(int(a[0]))
                         fraudolent_blocks.append(int(a[1]))
                 else:
                     if line.startswith("#"):                
                         continue
-                    else:                                  # Calculate the average incrementally                
+                    else:                                                 
                         if cycle != 0:                                      
                             a = line.split('            ') 
                             honest_blocks[cycle] = ( (honest_blocks[cycle] * files_scanned) + int(a[0]) ) / (files_scanned + 1)               
@@ -89,16 +88,16 @@ else:                         # Building all other statistics
             print filename
             cycle = 0
             for line in in_file:                    
-                if files_scanned == 0:  # the first time we have to populate the arrays
+                if files_scanned == 0:  
                     if line.startswith("#"):
                         forks.append(None)   
                     else:     
-                        a = line.split('            ')   #exactly 12 spaces
+                        a = line.split('            ')   
                         forks.append(int(a[0]))     
                 else:
                     if line.startswith("#"):                            
                         continue                       
-                    else:                                  # Calculate the average incrementally                
+                    else:                                               
                         if cycle != 0:                                      
                             a = line.split('            ')                    
                             forks[cycle] = ( (forks[cycle] * files_scanned) + int(a[0]) ) / (files_scanned + 1)
@@ -114,7 +113,6 @@ else:                         # Building all other statistics
             
             
     # Compute the ratio mined_blocks/hash_rate for honest and selfish miners
-
     honest_hr = []
     selfish_hr = []
     files_scanned = 0
@@ -124,18 +122,18 @@ else:                         # Building all other statistics
             print filename
             cycle = 0
             for line in in_file:                    
-                if files_scanned == 0:  # the first time we have to populate the arrays
+                if files_scanned == 0:  
                     if line.startswith("#"):    
                         honest_hr.append(None)
                         selfish_hr.append(None)
                     else:
-                        a = line.split('            ')   #exactly 12 spaces
+                        a = line.split('            ')   
                         honest_hr.append(int(a[0]))
                         selfish_hr.append(int(a[1]))
                 else:
                     if line.startswith("#"):                
                         continue
-                    else:                                  # Calculate the average incrementally                
+                    else:                                                
                         if cycle != 0:                                      
                             a = line.split('            ') 
                             honest_hr[cycle] = ( (honest_hr[cycle] * files_scanned) + int(a[0]) ) / (files_scanned + 1)               
@@ -148,8 +146,7 @@ else:                         # Building all other statistics
                 honest_ratio = float(honest_blocks[len(honest_blocks)-1]) / ((honest_hr[1] / 1000000000 ) + 1) # Add 1 to avoid division by zero
                 selfish_ratio = float(fraudolent_blocks[len(fraudolent_blocks)-1]) / ((selfish_hr[1] / 1000000000) + 1 )            
                 outs = outs + p + '        ' + str(honest_ratio) + '               ' + str(selfish_ratio) 
-                out_file.write(outs)
-            
+                out_file.write(outs)         
             
   
      

@@ -30,13 +30,6 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 	private List<Block> privateBlockchain; 
 	private int privateBranchLength;
 	
-	public boolean isSelected() {
-		return selected;
-	}
-
-	public void setSelected(boolean selected) {
-		this.selected = selected;
-	}
 
 	public SelfishMinerProtocol(String prefix) {
 		minedBlocks = 0;
@@ -45,14 +38,6 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 		nodeProtocol = Configuration.getPid(prefix + "." + PAR_NODE_PROT);
 		privateBlockchain = new ArrayList<>();
 		privateBranchLength = 0;
-	}
-	
-	public void setPrivateBranchLength(int privateBranchLength) {
-		this.privateBranchLength = privateBranchLength;
-	}
-
-	public void setPrivateBlockchain(List<Block> privateBlockchain) {
-		this.privateBlockchain = privateBlockchain;
 	}
 
 	@Override
@@ -70,9 +55,25 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 			
 		}
 		catch(CloneNotSupportedException  e) {
-			
+			System.err.println(e);
 		}
 		return smp;
+	}
+	
+	public boolean isSelected() {
+		return selected;
+	}
+	
+	public void setSelected(boolean selected) {
+		this.selected = selected;
+	}
+	
+	public void setPrivateBranchLength(int privateBranchLength) {
+		this.privateBranchLength = privateBranchLength;
+	}
+	
+	public void setPrivateBlockchain(List<Block> privateBlockchain) {
+		this.privateBlockchain = privateBlockchain;
 	}
 	
 	public void setMaxTransPerBlock(int maxTransPerBlock) {
@@ -94,7 +95,6 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 	public void setMinedBlocks(int minedBlocks) {
 		this.minedBlocks = minedBlocks;
 	}
-
 	
 	@Override
 	public void nextCycle(Node node, int pid)
@@ -103,12 +103,10 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 		{
 			setSelected(false);
 			TinyCoinNode tnode = (TinyCoinNode)node;
-			Map<String, Transaction> transPool = tnode.getTransPool();
-			
+			Map<String, Transaction> transPool = tnode.getTransPool();			
 			// Create a new block
 			Block b = createBlock(transPool, tnode);
-			String last = privateBlockchain.size()==0 ? null : privateBlockchain.get(privateBlockchain.size()-1).getBid();
-			
+			String last = privateBlockchain.size()==0 ? null : privateBlockchain.get(privateBlockchain.size()-1).getBid();			
 			if (isValidBlock(last, b)) {								
 				// Announce the block either to the selfish miners or to all the neighbor nodes based on convenience
 				List<Block> blockchain = tnode.getBlockchain();
@@ -117,12 +115,12 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 				privateBranchLength ++;
 				// If there was a fork, publish both blocks of the private branch to win the tie break
 				if (prevDifference == 0 && privateBranchLength == 2 ) {
-					copyPrivateBlockchain(tnode); // TODO my assumption, but is it correct?
+					copyPrivateBlockchain(tnode); 
 					for (int i = privateBranchLength; i > 0; i--) 
 						sendBlockToNeighbors(node, nodeProtocol, privateBlockchain.get(privateBlockchain.size()-i));
 					privateBranchLength = 0;				
 				}
-				else  //TODO: added this 'else', to be checked
+				else 
 					sendBlockToSelfishMiners(node, pid, b);			
 				System.out.println("Mined a block!" );
 			}			
@@ -134,15 +132,12 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 			try {
 				throw new Exception("Parent node of the new block is different from the last"
 						+ "node of the blockchain");
-			} catch (Exception e) {
-				//e.printStackTrace();         //Exception put for debug purposes, it is fired everytime an already received block is received
+			} catch (Exception e) {				
 				return false;
 			}
 		}
 		return true;
-	}
-	
-	
+	}	
 	
 	/** Sends a block b to the protocol pid of all the neighbor nodes
 	 * 
@@ -197,25 +192,22 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 			}
 			sendBlockToSelfishMiners(node, pid, b);	
 		}				
-	}
+	}	
 	
-	
-	//TODO: 'merged' tnode and node in tnode, should work but test
 	private Block createBlock(Map<String, Transaction> transPool, TinyCoinNode tnode) {
 		minedBlocks++;
 		int transInBlock = Math.min(transPool.size(), maxTransPerBlock);
 		String bid = "B" + tnode.getID() + minedBlocks;			
 		String parent = privateBlockchain.size()== 0 
 				? null : privateBlockchain.get(privateBlockchain.size()-1).getBid();
-		List<Transaction> trans = new ArrayList<>(transInBlock);
-		//TODO: catch 'NoSUchElementException' in case TransPool is empty (cycle 1)
+		List<Transaction> trans = new ArrayList<>(transInBlock);		
 		Iterator<String> iter = tnode.getTransPool().keySet().iterator();
 		for (int i=0; i< transInBlock; i++) {
 			String key = iter.next();
 			Transaction t = transPool.get(key);
 			iter.remove();
 			trans.add(t);
-			if (t.getOutput() == tnode) {  //TODO check if test works
+			if (t.getOutput() == tnode) { 
 				tnode.increaseBalance(t.getAmount());
 			}
 		}
@@ -260,9 +252,5 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 			Block b = blockchain.get(blockchain.size() - (i+1));
 			privateBlockchain.add(b);
 		}
-	}
-	
-	
-	
-	
+	}	
 }

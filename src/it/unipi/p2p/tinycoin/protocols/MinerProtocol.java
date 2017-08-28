@@ -14,7 +14,7 @@ import peersim.core.Linkable;
 import peersim.core.Node;
 import peersim.transport.Transport;
 
-//TODO: must add a method to reach consensus
+
 public class MinerProtocol implements CDProtocol{
 	
 	private static final String PAR_MAX_TRANS_BLOCK = "max_trans_block";
@@ -25,17 +25,8 @@ public class MinerProtocol implements CDProtocol{
 	private boolean selected;
 	private int maxTransPerBlock;
 	private double reward;
-	private int nodeProtocol;
+	private int nodeProtocol;	
 	
-
-	
-	public boolean isSelected() {
-		return selected;
-	}
-
-	public void setSelected(boolean selected) {
-		this.selected = selected;
-	}
 
 	public MinerProtocol(String prefix) {
 		minedBlocks = 0;
@@ -53,13 +44,20 @@ public class MinerProtocol implements CDProtocol{
 			mp.setSelected(false);
 			mp.setMaxTransPerBlock(maxTransPerBlock);
 			mp.setReward(reward);
-			mp.setNodeProtocol(nodeProtocol);
-			
+			mp.setNodeProtocol(nodeProtocol);			
 		}
 		catch(CloneNotSupportedException  e) {
-			
+			System.err.println(e);
 		}
 		return mp;
+	}
+	
+	public boolean isSelected() {
+		return selected;
+	}
+
+	public void setSelected(boolean selected) {
+		this.selected = selected;
 	}
 	
 	public void setMaxTransPerBlock(int maxTransPerBlock) {
@@ -92,8 +90,7 @@ public class MinerProtocol implements CDProtocol{
 		
 		if (isSelected()) 
 		{
-			setSelected(false);
-			
+			setSelected(false);			
 			Map<String, Transaction> transPool = tnode.getTransPool();
 			List<Block> blockchain = tnode.getBlockchain();
 			// Create a new block and announce it to all the neighbors			
@@ -101,8 +98,7 @@ public class MinerProtocol implements CDProtocol{
 			blockchain.add(b);
 			tnode.increaseBalance(b.getRevenueForBlock()); //the reward for mining the block is given to the miner
 			tnode.increaseBalance(b.getTransactionsAmountIfRecipient(tnode));
-			sendBlockToNeighbors(node, nodeProtocol, b);			
-			
+			sendBlockToNeighbors(node, nodeProtocol, b);				
 			System.out.println("Mined a block!");
 		}		
 	}
@@ -132,14 +128,13 @@ public class MinerProtocol implements CDProtocol{
 		String parent = blockchain.size()== 0 
 				? null : blockchain.get(blockchain.size()-1).getBid();
 		List<Transaction> trans = new ArrayList<>(transInBlock);
-		//TODO: catch 'NoSUchElementException' in case TransPool is empty (cycle 1)
 		Iterator<String> iter = tnode.getTransPool().keySet().iterator();
 		for (int i=0; i< transInBlock; i++) {
 			String key = iter.next();
 			Transaction t = transPool.get(key);
 			iter.remove();
 			trans.add(t);
-			if (t.getOutput() == tnode) {  //TODO check if test works
+			if (t.getOutput() == tnode) {  
 				tnode.increaseBalance(t.getAmount());
 			}
 		}

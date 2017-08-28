@@ -6,8 +6,8 @@ import java.util.List;
 public class Block {
 	
 	private final String bid;
-	private final String parent;  // id del blocco padre
-	private final TinyCoinNode miner; // il miner che ha minato il blocco
+	private final String parent;  
+	private final TinyCoinNode miner; 
 	private final double reward;
 	private final List<Transaction> transactions;
 	
@@ -24,7 +24,6 @@ public class Block {
 			fees += t.getFee();
 		}
 		reward = fixedFee + fees;		
-		
 	}
 
 	public String getBid() {
