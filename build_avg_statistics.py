@@ -146,7 +146,45 @@ else:                         # Building all other statistics
                 honest_ratio = float(honest_blocks[len(honest_blocks)-1]) / ((honest_hr[1] / 1000000000 ) + 1) # Add 1 to avoid division by zero
                 selfish_ratio = float(fraudolent_blocks[len(fraudolent_blocks)-1]) / ((selfish_hr[1] / 1000000000) + 1 )            
                 outs = outs + p + '        ' + str(honest_ratio) + '               ' + str(selfish_ratio) 
-                out_file.write(outs)         
+                out_file.write(outs)     
+                
+                
+                
+    # Compute the ratio reward/hash_rate for honest and selfish miners
+    honest_reward = []
+    selfish_reward = []
+    files_scanned = 0
+    to_scan = [f for f in glob.glob('docs/statistics/reward_R*') if pattern in f ] 
+    for filename in to_scan:  
+        with open(filename) as in_file:
+            print filename
+            cycle = 0
+            for line in in_file:                    
+                if files_scanned == 0:  
+                    if line.startswith("#"):    
+                        honest_reward.append(None)
+                        selfish_reward.append(None)
+                    else:
+                        a = line.split('            ')   
+                        honest_reward.append(int(a[0]))
+                        selfish_reward.append(int(a[1]))
+                else:
+                    if line.startswith("#"):                
+                        continue
+                    else:                                                
+                        if cycle != 0:                                      
+                            a = line.split('            ') 
+                            honest_reward[cycle] = ( (honest_reward[cycle] * files_scanned) + int(a[0]) ) / (files_scanned + 1)               
+                            selfish_reward[cycle] = ( ( selfish_reward[cycle] * files_scanned ) + int(a[1]) ) / (files_scanned + 1)
+                cycle+=1       
+            files_scanned+=1            
+            
+    with open('docs/statistics/avg/reward_P' + p + '_avg.dat', 'w+') as out_file:
+                outs= '# P(SMiner) HonestReward/Ghr  SelfishReward/Ghr \n'    # Only use the reward computed for the last cycle
+                honest_ratio = float(honest_reward[len(honest_reward)-1] / 1000) / ((honest_hr[1] / 1000000000 ) + 1) # Add 1 to avoid division by zero
+                selfish_ratio = float(selfish_reward[len(selfish_reward)-1] / 1000) / ((selfish_hr[1] / 1000000000) + 1 )            
+                outs = outs + p + '        ' + str(honest_ratio) + '               ' + str(selfish_ratio) 
+                out_file.write(outs)       
             
   
      

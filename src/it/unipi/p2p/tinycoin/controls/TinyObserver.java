@@ -66,6 +66,8 @@ public class TinyObserver implements Control{
 		int sminers=0;
 		FileWriter forkStats = null;
 		FileWriter blockchainStats = null;
+		FileWriter hashrateStats = null;
+		FileWriter rewardStats = null;
 		FileWriter latencyStats = null;
 		BufferedWriter bw = null;			
 		cycle++;
@@ -100,7 +102,13 @@ public class TinyObserver implements Control{
 							"_P" + psm + ".dat", false);
 					bw = new BufferedWriter(blockchainStats);
 					bw.write("# Honest_blocks" + " " + "Fraudolent_blocks" + " " + "Cycle \n");				
-					bw.close();				
+					bw.close();		
+					
+					rewardStats = new FileWriter("docs/statistics/reward_R" + repetition + 
+							"_P" + psm + ".dat", false);
+					bw = new BufferedWriter(rewardStats);
+					bw.write("# Reward_honest" + " " + "Reward_selfish" + " " + "Cycle \n");				
+					bw.close();	
 					
 								
 					int hrsminers = 0;
@@ -113,9 +121,9 @@ public class TinyObserver implements Control{
 						else if (n.isMiner()) 					
 							hrhonests += getHashRate(n);							
 					}
-					blockchainStats = new FileWriter("docs/statistics/hashrate_R" + repetition + 
+					hashrateStats = new FileWriter("docs/statistics/hashrate_R" + repetition + 
 							"_P" + psm + ".dat", false);
-					bw = new BufferedWriter(blockchainStats);
+					bw = new BufferedWriter(hashrateStats);
 					bw.write("# Honest_HR" + " " + "Fraudolent_HR" + " " + "Probability(SelfishMiner) \n");
 					bw.write(hrhonests + "            " + hrsminers + "            " + psm);
 					bw.close();
@@ -132,20 +140,29 @@ public class TinyObserver implements Control{
 			}
 			
 			//Statistics about blockchain
-			int honestBlocks = 0;
-			int fraudolentBlocks = 0;			
+			int honestBlocks, fraudolentBlocks, honestReward, fraudolentReward;
+			honestBlocks = fraudolentBlocks = honestReward = fraudolentReward = 0;
 			List<Block> blockchain = node.getBlockchain();
 			for (Block b : blockchain) {
-				if (b.getMiner().isSelfishMiner())
+				if (b.getMiner().isSelfishMiner()) {
 					fraudolentBlocks++;
-				else
+					fraudolentReward += b.getRevenueForBlock();
+				}				
+				else {
 					honestBlocks++;
+					honestReward += b.getRevenueForBlock();
+				}					
 			}
-			// Add the fraudolent blocks that are in the private blockchain but not yet in the
+			// Add the fraudolent blocks (with the associated reward) that are in the private blockchain but not yet in the
 			// public one, if any. This is an optimistic assumption, indeed they could never end up in the blockchain
 			List<Block> privateBlockchain = ((SelfishMinerProtocol)node.getProtocol(smpid)).getPrivateBlockchain();
-			if (privateBlockchain.size() > blockchain.size())
+			int diff = privateBlockchain.size() - blockchain.size();
+			if (diff > 0) {
 				fraudolentBlocks += privateBlockchain.size() - blockchain.size();
+				for (int i = blockchain.size(); i < blockchain.size() + diff -1 ; i++) { 
+					fraudolentReward += privateBlockchain.get(i).getRevenueForBlock();
+				}
+			}				
 			
 			if (onlyLatency == true) {
 				int totalBlocks = honestBlocks + fraudolentBlocks;
@@ -178,6 +195,15 @@ public class TinyObserver implements Control{
 				bw = new BufferedWriter(forkStats);
 				bw.write(forks + "            " + cycle + "\n");
 				bw.close();
+				
+				// Statistics about reward
+				rewardStats = new FileWriter("docs/statistics/reward_R" + repetition + 
+						"_P" + psm + ".dat", true);
+				bw = new BufferedWriter(rewardStats);
+				bw.write(honestReward + "            " + 
+						fraudolentReward + "            "  + cycle + "\n");			
+				bw.close();
+				
 			}			
 		}
 		catch (IOException e) {

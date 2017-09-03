@@ -51,8 +51,7 @@ public class Block {
 	 */
 	public double getRevenueForBlock() {
 		double revenue = reward;
-		List<Transaction> trans = transactions;
-		for (Transaction t: trans)
+		for (Transaction t: transactions)
 			revenue += t.getFee();
 		return revenue;
 	}

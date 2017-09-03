@@ -1,5 +1,6 @@
 package it.unipi.p2p.tinycoin.protocols;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,8 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 	private boolean fork;
 	private Block forked;
 	private int numForks;
+	private List<Block> missedBlocks;
+	private int limit;
 	
 	public NodeProtocol(String prefix) 
 	{
@@ -35,8 +38,11 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 		fork = false;
 		forked = null;
 		numForks = 0;
-	}	
-	
+		missedBlocks = new ArrayList<>();
+		limit = 20;
+	}		
+
+
 	@Override
 	public Object clone() {
 		NodeProtocol np = null;
@@ -48,34 +54,14 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 			np.setFork(false);
 			np.setForked(null);
 			np.setNumForks(0);
+			np.setMissedBlocks(new ArrayList<>());
+			np.setLimit(limit);
 		}
 		catch(CloneNotSupportedException  e) {
 			System.err.println(e);
 		}
 		return np;
-	}
-	
-
-	public int getNumForks() {
-		return numForks;
-	}
-
-	public void setSmpid(int smpid) {
-		this.smpid = smpid;
-	}
-
-	public void setNumTrans(int numTrans) {
-		this.numTrans = numTrans;
-	}
-
-	public void setFork(boolean fork) {
-		this.fork = fork;
-	}
-	
-	public void setForked(Block forked) {
-		this.forked = forked;
-	}
-	
+	}	
 
 	@Override
 	public void nextCycle(Node node, int pid)
@@ -134,6 +120,8 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 				int prevDiff = privateBlockchain.size() - blockchain.size();
 				if ( last == b.getParent()) {
 					blockchain.add(b);
+					if (!missedBlocks.isEmpty())
+						attachMissedBlocks(tnode);
 					tnode.increaseBalance(b.getTransactionsAmountIfRecipient(tnode));
 					if (b.getMiner() == tnode) // Added this check, should be redundant
 						tnode.increaseBalance(b.getRevenueForBlock());
@@ -148,7 +136,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 						break;
 					case(1): 
 						Block sb = privateBlockchain.get(privateBlockchain.size() - 1);
-				     	sendBlockToNeighbors(node, pid, sb); 						
+				         	sendBlockToNeighbors(node, pid, sb); 						
 						break;
 					case(2):
 						for (int i = privateBranchLength; i > 0; i--) {
@@ -165,9 +153,11 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 						break;
 					}
 				}
+				else
+					addMissedBlock(b, tnode);
 			}			
 			else {
-				// If the parent field of the block is valid, then the honest miner adds the block 
+				// If the parent field of the block is valid, then the honest node adds the block 
 				// to its blockchain and removes the transactions inside the block from the pool.				
 				if ( last == b.getParent() ||
 						(fork == true && forked.getBid() == b.getParent())) {
@@ -187,6 +177,8 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 						forked = null;
 					}
 					blockchain.add(b);
+					if (!missedBlocks.isEmpty())
+						attachMissedBlocks(tnode);
 					tnode.increaseBalance(b.getTransactionsAmountIfRecipient(tnode));
 					removeTransactionsFromPool(tnode, b);
 					
@@ -201,7 +193,9 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 					forked = b;
 					numForks++;
 					sendBlockToNeighbors(node, pid, b);	
-				}				
+				}
+				else if (last != b.getParent())
+					addMissedBlock(b, tnode);
 			}			
 		}		
 	}
@@ -230,7 +224,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 		Linkable linkable = (Linkable) sender.getProtocol(linkableID);
 			for (int i =0; i<linkable.degree(); i++) {
 				Node peer = linkable.getNeighbor(i);
-				((Transport)sender.getProtocol(FastConfig.getTransport(pid))) //TODO: set Transport class
+				((Transport)sender.getProtocol(FastConfig.getTransport(pid))) 
 				.send(sender, peer, t, pid);
 			}		
 	}
@@ -252,12 +246,63 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 			}
 	}
 	
+	/** Scans the list of missed blocks trying to find some blocks that can be attached to the head of the blockchain	
+	 */
+	public void attachMissedBlocks(TinyCoinNode tn) 
+	{
+		List <Block> blockchain = tn.getBlockchain();
+		Block head = blockchain.get(blockchain.size()-1);
+		for (int i=0; i< missedBlocks.size(); i++) {
+			if (missedBlocks.get(i).getParent() == head.getBid()) {
+				head = missedBlocks.remove(i);
+				blockchain.add(head);
+				removeTransactionsFromPool(tn, head);
+				i = 0;  // The head of the blockchain changed, so we restart scanning				
+			}			
+		}
+	}
+	
+	public void addMissedBlock(Block missed, TinyCoinNode tn) {
+		if (missedBlocks.size() == limit)	// If reached the limit, empty it
+			missedBlocks.removeAll(missedBlocks);
+		if (!missedBlocks.contains(missed)) 
+			missedBlocks.add(missed);
+	}
+
+	public int getNumForks() {
+		return numForks;
+	}
+
+	public void setSmpid(int smpid) {
+		this.smpid = smpid;
+	}
+
+	public void setNumTrans(int numTrans) {
+		this.numTrans = numTrans;
+	}
+
+	public void setFork(boolean fork) {
+		this.fork = fork;
+	}
+	
+	public void setForked(Block forked) {
+		this.forked = forked;
+	}
+	
 	public double getTransProb() {
 		return transProb;
 	}
 
 	public void setTransProb(double transProb) {
 		this.transProb = transProb;
+	}
+	
+	public void setMissedBlocks(List<Block> missedBlocks) {
+		this.missedBlocks = missedBlocks;
+	}
+
+	public void setLimit(int limit) {
+		this.limit = limit;
 	}
 	
 	private boolean onlyAddTheBlock(List<Block> privateBlockchain , List<Block> blockchain ) 

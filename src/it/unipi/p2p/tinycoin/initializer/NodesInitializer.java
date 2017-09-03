@@ -48,7 +48,7 @@ public class NodesInitializer implements Control
 	public boolean execute()
 	{
 		if (pcpu + pgpu + pfpga + pasic != 1) {
-			System.err.println("The sum of the probabilities of the mining  HW must be equal to 100");
+			System.err.println("The sum of the probabilities of the mining  HW must be equal to 1");
 			return true;		
 		}			
 			

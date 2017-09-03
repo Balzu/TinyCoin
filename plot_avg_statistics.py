@@ -51,6 +51,23 @@ with open('docs/plots/temp.gnu', 'w+') as file:
         file.write(hr_plot)
 os.system ('gnuplot docs/plots/temp.gnu')
 
+# Plot reward / hash_rate graph
+# Make one file of the several ones
+to_merge = [f for f in glob.glob('docs/statistics/avg/reward_P*')] 
+rew_file = ''
+for filename in to_merge:
+    with open(filename) as in_file:        
+        rew_file = rew_file + in_file.read() + '\n'
+with open('docs/statistics/avg/reward_avg_merged.dat', 'w+') as file:
+        file.write(rew_file)
+rew_plot = plot_template
+rew_plot += 'set xlabel \'P(selfish miner) \' \nset ylabel\'Reward / Hash rate \' \n'
+rew_plot += 'set output \'docs/plots/reward_per_hashrate.png\' \n'
+rew_plot += 'plot \'docs/statistics/avg/reward_avg_merged.dat\' u 1:2 smooth unique t \'Honest miners\' w lp ls 1, \\\n\'\'                  u 1:3 smooth unique t \'Selfish miners\' w lp ls 2'
+with open('docs/plots/temp.gnu', 'w+') as file:
+        file.write(rew_plot)
+os.system ('gnuplot docs/plots/temp.gnu')
+
 
 # Plot graphs of mined blocks for different values of message delay
 delay_plot = plot_template

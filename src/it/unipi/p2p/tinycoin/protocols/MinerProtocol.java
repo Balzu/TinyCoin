@@ -134,9 +134,9 @@ public class MinerProtocol implements CDProtocol{
 			Transaction t = transPool.get(key);
 			iter.remove();
 			trans.add(t);
-			if (t.getOutput() == tnode) {  
-				tnode.increaseBalance(t.getAmount());
-			}
+			//if (t.getOutput() == tnode) {  
+			//	tnode.increaseBalance(t.getAmount());
+			//}
 		}
 		return new Block(bid, parent, tnode, trans, reward);	
 	}

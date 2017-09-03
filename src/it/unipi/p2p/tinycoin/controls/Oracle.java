@@ -94,7 +94,7 @@ public class Oracle implements Control {
 						    break;
 				case FPGA : nfpga++;
 				            break;
-		        case ASIC : nasic++;
+		                case ASIC : nasic++;
 				            break;
 				}
 			}
