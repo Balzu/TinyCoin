@@ -121,7 +121,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 				if ( last == b.getParent()) {
 					blockchain.add(b);
 					if (!missedBlocks.isEmpty())
-						attachMissedBlocks(tnode);
+						attachMissedBlocksToBlockchain(tnode);
 					tnode.increaseBalance(b.getTransactionsAmountIfRecipient(tnode));
 					if (b.getMiner() == tnode) // Added this check, should be redundant
 						tnode.increaseBalance(b.getRevenueForBlock());
@@ -154,7 +154,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 					}
 				}
 				else
-					addMissedBlock(b, tnode);
+					addMissedBlockToPool(b);
 			}			
 			else {
 				// If the parent field of the block is valid, then the honest node adds the block 
@@ -165,6 +165,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 						if (forked.getBid() == b.getParent()) {
 							Block lastb = blockchain.get(blockchain.size()-1);
 							blockchain.remove(lastb); 
+							addTransactionsToPool(tnode, lastb);
 							tnode.decreaseBalance(lastb.getTransactionsAmountIfRecipient(tnode));
 							if (tnode == lastb.getMiner())
 								tnode.decreaseBalance(lastb.getRevenueForBlock());
@@ -178,7 +179,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 					}
 					blockchain.add(b);
 					if (!missedBlocks.isEmpty())
-						attachMissedBlocks(tnode);
+						attachMissedBlocksToBlockchain(tnode);
 					tnode.increaseBalance(b.getTransactionsAmountIfRecipient(tnode));
 					removeTransactionsFromPool(tnode, b);
 					
@@ -193,9 +194,10 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 					forked = b;
 					numForks++;
 					sendBlockToNeighbors(node, pid, b);	
+					solveForkWithMissedBlocks(tnode);
 				}
 				else if (last != b.getParent())
-					addMissedBlock(b, tnode);
+					addMissedBlockToPool(b);
 			}			
 		}		
 	}
@@ -205,6 +207,13 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 		Map<String, Transaction> transPool = tn.getTransPool();
 		for (Transaction t : b.getTransactions()) {						
 			transPool.remove(t.getTid());
+		}
+	}
+	
+	public void addTransactionsToPool(TinyCoinNode tn, Block b) {
+		Map<String, Transaction> transPool = tn.getTransPool();
+		for (Transaction t : b.getTransactions()) {						
+			transPool.putIfAbsent(t.getTid(), t);
 		}
 	}
 	
@@ -246,23 +255,48 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 			}
 	}
 	
+	public boolean solveForkWithMissedBlocks(TinyCoinNode tn) {
+		List <Block> blockchain = tn.getBlockchain();
+		for (int i=0; i< missedBlocks.size(); i++) {
+			if (missedBlocks.get(i).getParent() == forked.getBid()) {	
+				Block lastb = blockchain.get(blockchain.size()-1);
+				blockchain.remove(lastb); 
+				tn.decreaseBalance(lastb.getTransactionsAmountIfRecipient(tn));
+				addTransactionsToPool(tn, lastb);
+				blockchain.add(forked);	
+				Block head = missedBlocks.remove(i);
+				blockchain.add(head);
+				removeTransactionsFromPool(tn, head);
+				fork = false;
+				forked = null;
+				attachMissedBlocksToBlockchain(tn);				
+				return true;
+			}			
+		}
+		return false;
+	}
+	
 	/** Scans the list of missed blocks trying to find some blocks that can be attached to the head of the blockchain	
 	 */
-	public void attachMissedBlocks(TinyCoinNode tn) 
+	public void attachMissedBlocksToBlockchain(TinyCoinNode tn) 
 	{
 		List <Block> blockchain = tn.getBlockchain();
 		Block head = blockchain.get(blockchain.size()-1);
-		for (int i=0; i< missedBlocks.size(); i++) {
+		int i=0;
+		while ( i< missedBlocks.size()) {
 			if (missedBlocks.get(i).getParent() == head.getBid()) {
 				head = missedBlocks.remove(i);
 				blockchain.add(head);
 				removeTransactionsFromPool(tn, head);
+				tn.increaseBalance(head.getTransactionsAmountIfRecipient(tn));
 				i = 0;  // The head of the blockchain changed, so we restart scanning				
-			}			
+			}	
+			else
+				i++;
 		}
 	}
 	
-	public void addMissedBlock(Block missed, TinyCoinNode tn) {
+	public void addMissedBlockToPool(Block missed) {
 		if (missedBlocks.size() == limit)	// If reached the limit, empty it
 			missedBlocks.removeAll(missedBlocks);
 		if (!missedBlocks.contains(missed)) 
@@ -313,5 +347,4 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 		else
 			return false;
 	}
-
 }
