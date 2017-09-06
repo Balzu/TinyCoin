@@ -26,7 +26,6 @@ public class MinerProtocol implements CDProtocol{
 	private int maxTransPerBlock;
 	private double reward;
 	private int nodeProtocol;	
-	
 
 	public MinerProtocol(String prefix) {
 		minedBlocks = 0;
@@ -133,10 +132,7 @@ public class MinerProtocol implements CDProtocol{
 			String key = iter.next();
 			Transaction t = transPool.get(key);
 			iter.remove();
-			trans.add(t);
-			//if (t.getOutput() == tnode) {  
-			//	tnode.increaseBalance(t.getAmount());
-			//}
+			trans.add(t);			
 		}
 		return new Block(bid, parent, tnode, trans, reward);	
 	}

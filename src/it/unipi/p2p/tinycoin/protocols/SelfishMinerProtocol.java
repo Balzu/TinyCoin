@@ -28,8 +28,7 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 	private double reward;
 	private int nodeProtocol;
 	private List<Block> privateBlockchain; 
-	private int privateBranchLength;
-	
+	private int privateBranchLength;	
 
 	public SelfishMinerProtocol(String prefix) {
 		minedBlocks = 0;
@@ -51,8 +50,7 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 			smp.setReward(reward);
 			smp.setNodeProtocol(nodeProtocol);
 			smp.setPrivateBlockchain(new ArrayList<>());
-			smp.setPrivateBranchLength(0);
-			
+			smp.setPrivateBranchLength(0);			
 		}
 		catch(CloneNotSupportedException  e) {
 			System.err.println(e);
@@ -230,11 +228,13 @@ public class SelfishMinerProtocol implements CDProtocol, EDProtocol {
 		Block last = blockchain.get(blockchain.size() - 1);
 		blockchain.remove(last); //remove last item  
 		tnode.decreaseBalance(last.getTransactionsAmountIfRecipient(tnode));
+		((NodeProtocol)tnode.getProtocol(nodeProtocol)).addTransactionsToPool(tnode, last);
 		if (tnode == last.getMiner())
 			tnode.decreaseBalance(last.getRevenueForBlock()); //remove block reward			
 		for (int i = privateBranchLength; i > 0; i--) {
 			Block b = privateBlockchain.get(privateBlockchain.size() - i);
 			blockchain.add(b); 
+			((NodeProtocol)tnode.getProtocol(nodeProtocol)).removeTransactionsFromPool(tnode, b);
 			tnode.increaseBalance(b.getTransactionsAmountIfRecipient(tnode));
 			if (tnode == b.getMiner())
 				tnode.increaseBalance(b.getRevenueForBlock()); //get reward for the added block

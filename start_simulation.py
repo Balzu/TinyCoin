@@ -8,7 +8,7 @@ else:
 
 # Set parameters values
 size = '1000'
-cycles = '20'
+cycles = '30'
 cycle_length = '1000'
 drop = '0'
 max_trans_per_block = '50'

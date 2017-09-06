@@ -1,6 +1,6 @@
 package it.unipi.p2p.tinycoin.controls;
-import java.util.Random;
 
+import java.util.Random;
 import it.unipi.p2p.tinycoin.MinerType;
 import it.unipi.p2p.tinycoin.TinyCoinNode;
 import it.unipi.p2p.tinycoin.protocols.MinerProtocol;
@@ -135,5 +135,4 @@ public class Oracle implements Control {
 		}
 		return null;
 	}
-
 }

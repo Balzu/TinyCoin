@@ -57,9 +57,7 @@ public class MissedBlocksTest {
 		processEvent(null, 0, b2);
 		processEvent(null, 0, b3);		
 		assertEquals(blockchain.size(),4);
-	}	
-	
-	
+	}		
 	
 	/** Scans the list of missed blocks trying to find some blocks that can be attached to the head of the blockchain	
 	 */

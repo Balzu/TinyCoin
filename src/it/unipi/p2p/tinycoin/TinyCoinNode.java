@@ -9,11 +9,11 @@ import peersim.core.GeneralNode;
 public class TinyCoinNode extends GeneralNode{
 	
 	
-	private NodeType nodeType;
-	private MinerType minerType;
-	private double balance;
-	private List<Block> blockchain; 
-        private Map<String, Transaction> transPool;
+    private NodeType nodeType;
+    private MinerType minerType;
+    private double balance;
+    private List<Block> blockchain; 
+    private Map<String, Transaction> transPool;
         
         
     public TinyCoinNode(String prefix) {
@@ -93,5 +93,4 @@ public class TinyCoinNode extends GeneralNode{
 	public Map<String, Transaction> getTransPool() {
 		return transPool;
 	}
-
 }

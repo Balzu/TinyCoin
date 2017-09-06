@@ -28,8 +28,7 @@ public class NodesInitializer implements Control
 	private double pgpu;
 	private double pfpga;
 	private double pasic;	
-	private double maxBalance;
-	
+	private double maxBalance;	
 
 	public NodesInitializer(String prefix)
 	{

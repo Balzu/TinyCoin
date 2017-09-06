@@ -38,5 +38,4 @@ public class Transaction {
 		return "Transaction " + tid + ": Source = " + input.getID() + ", Destination = " +
 				output.getID() + ", amount = " + amount + ", fee = " + fee;
 	}
-
 }

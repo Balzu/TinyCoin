@@ -40,8 +40,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 		numForks = 0;
 		missedBlocks = new ArrayList<>();
 		limit = 20;
-	}		
-
+	}	
 
 	@Override
 	public Object clone() {
@@ -147,10 +146,12 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 						smp.setPrivateBranchLength(0);						
 						break;
 					default:
-						sb = privateBlockchain.get(privateBlockchain.size() - privateBranchLength);
-						sendBlockToNeighbors(node, pid, sb); 
-						smp.setPrivateBranchLength(privateBranchLength - 1);
-						break;
+					    if (prevDiff > 2 && privateBranchLength > 0)
+					    {					    
+						    sb = privateBlockchain.get(privateBlockchain.size() - privateBranchLength);						    
+						    sendBlockToNeighbors(node, pid, sb); 						    
+						    smp.setPrivateBranchLength(privateBranchLength - 1);
+					    } 
 					}
 				}
 				else
@@ -267,6 +268,7 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 				Block head = missedBlocks.remove(i);
 				blockchain.add(head);
 				removeTransactionsFromPool(tn, head);
+				tn.increaseBalance(head.getTransactionsAmountIfRecipient(tn));
 				fork = false;
 				forked = null;
 				attachMissedBlocksToBlockchain(tn);				
@@ -283,13 +285,13 @@ public class NodeProtocol implements CDProtocol, EDProtocol{
 		List <Block> blockchain = tn.getBlockchain();
 		Block head = blockchain.get(blockchain.size()-1);
 		int i=0;
-		while ( i< missedBlocks.size()) {
+		while ( i < missedBlocks.size()) {
 			if (missedBlocks.get(i).getParent() == head.getBid()) {
 				head = missedBlocks.remove(i);
 				blockchain.add(head);
 				removeTransactionsFromPool(tn, head);
 				tn.increaseBalance(head.getTransactionsAmountIfRecipient(tn));
-				i = 0;  // The head of the blockchain changed, so we restart scanning				
+				i = 0;  // The head of the blockchain changed, so we restart scanning the missed blocks				
 			}	
 			else
 				i++;

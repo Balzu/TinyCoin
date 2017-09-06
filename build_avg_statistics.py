@@ -1,5 +1,6 @@
 import glob
 import sys
+#import pdb
 
 if sys.argv[1].startswith("d"):  # Building latency statistics
     d = sys.argv[1][1:]
@@ -10,9 +11,7 @@ if sys.argv[1].startswith("d"):  # Building latency statistics
     blocks = []
     to_scan = [f for f in glob.glob('docs/statistics/latency_R*') if pattern in f ] 
     for filename in to_scan:    
-        print filename
         with open(filename) as in_file:
-            print filename
             cycle = 0
             for line in in_file:                    
                 if files_scanned == 0:  # the first time we have to populate the arrays
@@ -34,7 +33,6 @@ if sys.argv[1].startswith("d"):  # Building latency statistics
             
     with open('docs/statistics/avg/latency_D' + d + '_avg.dat', 'w+') as out_file:
                 outs= '# Cycle blocks \n'
-                print (blocks)
                 for count in range(1, len(blocks)):
                     outs = outs + str(count) + '     ' + str(blocks[count]) + '\n'
                 out_file.write(outs) 
@@ -87,6 +85,7 @@ else:                         # Building all other statistics
         with open(filename) as in_file:
             print filename
             cycle = 0
+           # pdb.set_trace() 
             for line in in_file:                    
                 if files_scanned == 0:  
                     if line.startswith("#"):
@@ -99,14 +98,13 @@ else:                         # Building all other statistics
                         continue                       
                     else:                                               
                         if cycle != 0:                                      
-                            a = line.split('            ')                    
+                            a = line.split('            ')                                              
                             forks[cycle] = ( (forks[cycle] * files_scanned) + int(a[0]) ) / (files_scanned + 1)
                 cycle+=1       
             files_scanned+=1                    
             
     with open('docs/statistics/avg/forks_P' + p + '_avg.dat', 'w+') as out_file:
                 outs= '# Cycle Forks \n'
-                print (forks)
                 for count in range(1, len(forks)):
                     outs = outs + str(count) + '     ' + str(forks[count]) + '\n'    
                 out_file.write(outs)   
@@ -119,7 +117,6 @@ else:                         # Building all other statistics
     to_scan = [f for f in glob.glob('docs/statistics/hashrate_R*') if pattern in f ] 
     for filename in to_scan:  
         with open(filename) as in_file:
-            print filename
             cycle = 0
             for line in in_file:                    
                 if files_scanned == 0:  
@@ -157,7 +154,6 @@ else:                         # Building all other statistics
     to_scan = [f for f in glob.glob('docs/statistics/reward_R*') if pattern in f ] 
     for filename in to_scan:  
         with open(filename) as in_file:
-            print filename
             cycle = 0
             for line in in_file:                    
                 if files_scanned == 0:  

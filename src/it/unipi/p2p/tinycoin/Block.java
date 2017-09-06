@@ -3,8 +3,8 @@ package it.unipi.p2p.tinycoin;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Block {
-	
+public class Block 
+{	
 	private final String bid;
 	private final String parent;  
 	private final TinyCoinNode miner; 
@@ -66,6 +66,5 @@ public class Block {
 				amount += t.getAmount();
 		}
 		return amount;		
-	}	
-
+	}
 }
