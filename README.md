@@ -16,7 +16,7 @@ A simulation consists in choosing a set of values for the parameters and, for ea
 It is possible to set up a simulation thanks to the use of scripts: 
 
 
-* `start_simulation.py`: it's the script that actually starts the simulation. The set of parameters for the simulation are defined in this file. The values provided for these parameters have to be substituted in the `tinycoin_config_for_script.txt` file and a temporary file will be created to run the experiments.
+* `start_simulation.py`: it's the script that actually starts the simulation. The set of parameters for the simulation are defined in this file. The values provided for these parameters will be substituted in the `tinycoin_config_for_script.txt` file and a temporary file will be created to run the experiments.
 * `build_avg_statistics.py`: this script, called by `start_simulation.py`, collects the statistics produced by the executions of the experiments, makes the proper averages and writes in the `docs/statistics/avg` subfolder these files ready to be plotted
 * `plot_avg_statistics.py`: this script, called by `start_simulation.py`, reads the files in the `docs/statistics/avg` subfolder and uses Gnuplot to create the graphs that will be stored in the `docs/plots` subfolder.
 
